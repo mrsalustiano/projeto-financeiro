@@ -1,0 +1,23 @@
+﻿meta {
+  name: criarCliente_401
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/master/clientes
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+{ "nomeCliente": "X", "nomeAdministrador": "Y", "emailAdministrador": "y@fincontrol.local", "senhaAdministrador": "segredo123" }
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(401);
+}

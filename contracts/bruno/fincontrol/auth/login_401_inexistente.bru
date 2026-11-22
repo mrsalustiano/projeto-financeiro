@@ -1,0 +1,24 @@
+﻿meta {
+  name: login_401_inexistente
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+{ "email": "nao-existe@fincontrol.local", "senha": "{{senha}}" }
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(401);
+  expect(res.getBody().detail).to.equal('Não autenticado.');
+}
