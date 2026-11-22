@@ -1,0 +1,40 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: fincontrol-mysql
+    restart: unless-stopped
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?defina MYSQL_ROOT_PASSWORD no infra/.env}
+      MYSQL_DATABASE: fincontrol
+      MYSQL_USER: fincontrol_app
+      MYSQL_PASSWORD: ${MYSQL_APP_PASSWORD:?defina MYSQL_APP_PASSWORD no infra/.env}
+      MYSQL_MIGRATE_PASSWORD: ${MYSQL_MIGRATE_PASSWORD:?defina MYSQL_MIGRATE_PASSWORD no infra/.env}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+    volumes:
+      - fincontrol-mysql:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  portainer:
+    image: portainer/portainer-ce:lts
+    container_name: fincontrol-portainer
+    restart: unless-stopped
+    ports:
+      - "9443:9443"
+      - "8000:8000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer-data:/data
+
+volumes:
+  fincontrol-mysql:
+  portainer-data:
