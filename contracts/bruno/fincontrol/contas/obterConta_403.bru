@@ -1,0 +1,20 @@
+﻿meta {
+  name: obterConta_403
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/contas/{{idFlash}}
+  body: none
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessMaster}}
+}
+
+
+script:post-response {
+  expect(res.getStatus()).to.equal(403);
+}

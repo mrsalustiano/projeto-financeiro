@@ -1,0 +1,19 @@
+﻿meta {
+  name: obterConta_401
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/contas/{{idFlash}}
+  body: none
+  auth: none
+}
+
+headers {
+}
+
+
+script:post-response {
+  expect(res.getStatus()).to.equal(401);
+}
