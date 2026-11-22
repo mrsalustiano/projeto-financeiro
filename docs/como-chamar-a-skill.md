@@ -6,14 +6,14 @@ No chat, cite o nome da skill e o número da fase. Uma mensagem implementa uma f
 
 ## Antes da fase 0
 
-No PowerShell, na raiz do projeto:
+O Docker roda no WSL. No terminal da distro, na pasta do projeto (`/mnt/c/Users/mrsal/Documents/projeto-financeiro`):
 
-```powershell
-Copy-Item infra\.env.example infra\.env
+```bash
+cp infra/.env.example infra/.env
 docker compose -f infra/docker-compose.yml up -d
 ```
 
-Troque as senhas em `infra/.env` antes de subir. O MySQL fica em `localhost:3306`. O Portainer abre em `https://localhost:9443`.
+Troque as senhas em `infra/.env` antes de subir. O MySQL fica em `localhost:3306` (Windows e WSL). O Portainer abre em `https://localhost:9443` e administra o Docker do WSL pelo socket `/var/run/docker.sock`.
 
 ## O que escrever no chat
 

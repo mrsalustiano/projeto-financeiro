@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: fincontrol
+  datasource:
+    url: jdbc:mysql://localhost:3306/fincontrol
+    username: ${DB_USERNAME:fincontrol_app}
+    password: "${DB_PASSWORD:fin@2026}"
+  flyway:
+    user: ${FLYWAY_USER:fincontrol_migrate}
+    password: "${FLYWAY_PASSWORD:migra@2026}"
+
+server:
+  port: 8080

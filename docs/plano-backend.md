@@ -242,7 +242,7 @@ Cada fase só começa com o contrato da anterior estável. O critério de aceite
 
 Módulo, Boot, `infra/docker-compose.yml` com MySQL 8.4 e Portainer, Flyway, gerador OpenAPI, `ApiExceptionHandler`, JaCoCo, ArchUnit e PMD.
 
-Aceite: `docker compose -f infra/docker-compose.yml up -d` sobe o MySQL em `localhost:3306` e o Portainer em `https://localhost:9443`. `mvn verify` passa sem Docker. O ArchUnit recusa Spring no `domain`. O JaCoCo recusa cobertura de instrução abaixo de 90%. O PMD recusa método longo ou complexo demais. O Package Checker (Mend.io) não mostra CVE crítica ou alta no `pom.xml`. O SonarQube for IDE não deixa issue nova de severidade alta no código desta fase. A aplicação, fora do teste, sobe e aplica as migrações nesse MySQL.
+Aceite: dentro do WSL, `docker compose -f infra/docker-compose.yml up -d` sobe o MySQL em `localhost:3306` e o Portainer em `https://localhost:9443`, ligado ao Docker dessa distro. `mvn verify` passa sem Docker. O ArchUnit recusa Spring no `domain`. O JaCoCo recusa cobertura de instrução abaixo de 90%. O PMD recusa método longo ou complexo demais. O Package Checker (Mend.io) não mostra CVE crítica ou alta no `pom.xml`. O SonarQube for IDE não deixa issue nova de severidade alta no código desta fase. A aplicação, fora do teste, sobe e aplica as migrações nesse MySQL.
 
 ### Fase 1 — Login e clientes
 

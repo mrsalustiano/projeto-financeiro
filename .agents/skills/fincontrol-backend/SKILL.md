@@ -11,14 +11,15 @@ Se a mensagem citar um número de fase, implemente só essa fase. Não avance pa
 
 ## Ambiente
 
-O banco não sobe no teste. Sobe no Docker:
+O banco não sobe no teste. O Docker roda no WSL, não no PowerShell. Entre na distro e use o projeto em `/mnt/c/Users/mrsal/Documents/projeto-financeiro`:
 
 ```bash
 cp infra/.env.example infra/.env
 docker compose -f infra/docker-compose.yml up -d
 ```
 
-- MySQL 8.4 em `localhost:3306`, banco `fincontrol`, charset `utf8mb4`. Usuário da aplicação `fincontrol_app`. Usuário do Flyway `fincontrol_migrate` (criado em `infra/mysql/init/01-usuario-migrate.sh`).
+- O socket do Portainer é `/var/run/docker.sock`, o do engine Linux dentro do WSL.
+- MySQL 8.4 em `localhost:3306`, visível no Windows e no WSL. Banco `fincontrol`, charset `utf8mb4`. Usuário da aplicação `fincontrol_app`. Usuário do Flyway `fincontrol_migrate` (criado em `infra/mysql/init/01-usuario-migrate.sh`, fim de linha LF).
 - Portainer em `https://localhost:9443` (primeiro acesso define a senha de admin).
 - Senha só em `infra/.env`, que não entra no Git. Ollama fica nativo no Windows, fora deste compose.
 
