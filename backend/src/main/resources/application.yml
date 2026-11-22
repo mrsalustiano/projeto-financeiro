@@ -11,3 +11,27 @@ spring:
 
 server:
   port: 8080
+
+fincontrol:
+  jwt:
+    private-key-pem: ${JWT_PRIVATE_KEY_PEM:}
+    public-key-pem: ${JWT_PUBLIC_KEY_PEM:}
+  cookie:
+    secure: ${COOKIE_SECURE:true}
+  seed:
+    senha: ${SEED_SENHA:}
+    usuario:
+      nome: ${SEED_NOME_USUARIO:Voce}
+      email: ${SEED_EMAIL_USUARIO:voce@fincontrol.local}
+    mae:
+      nome: ${SEED_NOME_MAE:Mae}
+      email: ${SEED_EMAIL_MAE:mae@fincontrol.local}
+    master:
+      nome: ${SEED_NOME_MASTER:Master}
+      email: ${SEED_EMAIL_MASTER:master@fincontrol.local}
+    inativo:
+      nome: ${SEED_NOME_INATIVO:Inativo}
+      email: ${SEED_EMAIL_INATIVO:inativo@fincontrol.local}
+    cliente-inativo:
+      nome: ${SEED_NOME_CLIENTE_INATIVO:Cliente inativo}
+      email: ${SEED_EMAIL_CLIENTE_INATIVO:cliente-inativo@fincontrol.local}

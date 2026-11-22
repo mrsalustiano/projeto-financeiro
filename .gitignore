@@ -1,3 +1,5 @@
 infra/.env
 *.ofx
 target/
+contracts/postman/local.postman_environment.json
+contracts/bruno/fincontrol/environments/local.bru
