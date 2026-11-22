@@ -12,10 +12,25 @@ spring:
 server:
   port: 8080
 
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    disable-swagger-default-url: true
+    urls-primary-name: auth
+    urls:
+      - name: auth
+        url: /contratos/auth.yaml
+      - name: master
+        url: /contratos/master.yaml
+      - name: categorias
+        url: /contratos/categorias.yaml
+      - name: contas
+        url: /contratos/contas.yaml
+
 fincontrol:
   jwt:
-    private-key-pem: ${JWT_PRIVATE_KEY_PEM:}
-    public-key-pem: ${JWT_PUBLIC_KEY_PEM:}
+    private-key-pem: ${JWT_PRIVATE_KEY_PEM:classpath:jwt/private.pem}
+    public-key-pem: ${JWT_PUBLIC_KEY_PEM:classpath:jwt/public.pem}
   cookie:
     secure: ${COOKIE_SECURE:true}
   seed:
@@ -35,3 +50,6 @@ fincontrol:
     cliente-inativo:
       nome: ${SEED_NOME_CLIENTE_INATIVO:Cliente inativo}
       email: ${SEED_EMAIL_CLIENTE_INATIVO:cliente-inativo@fincontrol.local}
+    leitor:
+      nome: ${SEED_NOME_LEITOR:Leitor}
+      email: ${SEED_EMAIL_LEITOR:leitor@fincontrol.local}

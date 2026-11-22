@@ -8,9 +8,13 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import br.com.fincontrol.domain.service.AcessoNegadoException;
 import br.com.fincontrol.domain.service.EmailEmUsoException;
+import br.com.fincontrol.domain.service.LimiteInvalidoException;
 import br.com.fincontrol.domain.service.LoginBloqueadoException;
 import br.com.fincontrol.domain.service.NaoAutenticadoException;
+import br.com.fincontrol.domain.service.NaoEncontradoException;
+import br.com.fincontrol.domain.service.NomeEmUsoException;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestControllerAdvice
@@ -44,6 +48,26 @@ public class ApiExceptionHandler {
     @ExceptionHandler(EmailEmUsoException.class)
     ProblemDetail emailEmUso(HttpServletRequest req) {
         return Problemas.de(HttpStatus.valueOf(422), "E-mail em uso", "E-mail já cadastrado.", req, ErroCodigo.EMAIL_EM_USO);
+    }
+
+    @ExceptionHandler(AcessoNegadoException.class)
+    ProblemDetail acessoNegado(HttpServletRequest req) {
+        return Problemas.de(HttpStatus.FORBIDDEN, "Acesso negado", "Acesso negado.", req, ErroCodigo.ACESSO_NEGADO);
+    }
+
+    @ExceptionHandler(NaoEncontradoException.class)
+    ProblemDetail naoEncontrado(HttpServletRequest req) {
+        return Problemas.de(HttpStatus.NOT_FOUND, "Não encontrado", "Não encontrado.", req, ErroCodigo.NAO_ENCONTRADO);
+    }
+
+    @ExceptionHandler(NomeEmUsoException.class)
+    ProblemDetail nomeEmUso(HttpServletRequest req) {
+        return Problemas.de(HttpStatus.valueOf(422), "Nome em uso", "Nome já cadastrado.", req, ErroCodigo.NOME_EM_USO);
+    }
+
+    @ExceptionHandler(LimiteInvalidoException.class)
+    ProblemDetail limiteInvalido(HttpServletRequest req) {
+        return Problemas.de(HttpStatus.valueOf(422), "Limite inválido", "Limite inválido para o tipo da conta.", req, ErroCodigo.LIMITE_INVALIDO);
     }
 
     @ExceptionHandler(Exception.class)

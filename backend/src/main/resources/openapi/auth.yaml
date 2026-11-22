@@ -7,6 +7,7 @@ paths:
     post:
       operationId: login
       tags: [auth]
+      security: []
       requestBody:
         required: true
         content:
@@ -30,6 +31,7 @@ paths:
     post:
       operationId: logout
       tags: [auth]
+      security: []
       parameters:
         - $ref: '#/components/parameters/RefreshCookie'
       responses:
@@ -41,6 +43,7 @@ paths:
     post:
       operationId: refreshToken
       tags: [auth]
+      security: []
       parameters:
         - $ref: '#/components/parameters/RefreshCookie'
       responses:
@@ -56,6 +59,7 @@ paths:
     get:
       operationId: me
       tags: [auth]
+      security: []
       responses:
         '200':
           description: Usuário do token

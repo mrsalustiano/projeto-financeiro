@@ -1,5 +1,8 @@
 package br.com.fincontrol.infrastructure.out.security;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -16,10 +19,30 @@ public final class ChavesJwt {
     }
 
     public static Par ler(String privadaPem, String publicaPem) {
-        if (privadaPem == null || privadaPem.isBlank() || publicaPem == null || publicaPem.isBlank()) {
+        String privada = material(privadaPem);
+        String publica = material(publicaPem);
+        if (privada == null || privada.isBlank() || publica == null || publica.isBlank()) {
             throw new IllegalStateException("Chaves JWT ausentes.");
         }
-        return new Par(privada(privadaPem), publica(publicaPem));
+        return new Par(privada(privada), publica(publica));
+    }
+
+    private static String material(String valor) {
+        if (valor == null || !valor.startsWith("classpath:")) {
+            return valor;
+        }
+        String caminho = valor.substring("classpath:".length());
+        if (caminho.startsWith("/")) {
+            caminho = caminho.substring(1);
+        }
+        try (InputStream entrada = ChavesJwt.class.getClassLoader().getResourceAsStream(caminho)) {
+            if (entrada == null) {
+                throw new IllegalStateException("Chaves JWT ausentes.");
+            }
+            return new String(entrada.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException ex) {
+            throw new IllegalStateException("Chaves JWT ausentes.", ex);
+        }
     }
 
     private static RSAPrivateKey privada(String pem) {

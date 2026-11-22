@@ -44,6 +44,7 @@ class SessaoUseCasesTest {
     @Mock private Relogio relogio;
     @Mock private EmissorDeSessao emissor;
     @Mock private SenhaPort senhas;
+    @Mock private GarantirCategoriasPadrao categoriasPadrao;
 
     @Test
     void refreshGiraCookieERevogaJtiAnterior() {
@@ -138,12 +139,13 @@ class SessaoUseCasesTest {
         when(senhas.hash("segredo123")).thenReturn("hash");
         when(clientes.inserir("Casa nova", true)).thenReturn(9L);
         when(usuarios.inserir(org.mockito.ArgumentMatchers.any())).thenReturn(11L);
-        CriarCliente caso = new CriarCliente(clientes, usuarios, senhas);
+        CriarCliente caso = new CriarCliente(clientes, usuarios, senhas, categoriasPadrao);
 
         ClienteCriado criado = caso.executar(" Casa nova ", " Ana ", " Novo@fincontrol.local ", "segredo123");
 
         assertThat(criado.clienteId()).isEqualTo(9L);
         assertThat(criado.administradorId()).isEqualTo(11L);
+        verify(categoriasPadrao).executar(9L);
         assertThat(Arrays.stream(CriarCliente.class.getDeclaredFields())
                 .noneMatch(campo -> campo.getType().getSimpleName().toLowerCase().contains("lancamento"))).isTrue();
     }
@@ -151,7 +153,7 @@ class SessaoUseCasesTest {
     @Test
     void emailRepetidoNaoCriaCliente() {
         when(usuarios.emailExiste("novo@fincontrol.local")).thenReturn(true);
-        CriarCliente caso = new CriarCliente(clientes, usuarios, senhas);
+        CriarCliente caso = new CriarCliente(clientes, usuarios, senhas, categoriasPadrao);
 
         assertThatThrownBy(() -> caso.executar("Casa", "Ana", "novo@fincontrol.local", "segredo123"))
                 .isInstanceOf(EmailEmUsoException.class);

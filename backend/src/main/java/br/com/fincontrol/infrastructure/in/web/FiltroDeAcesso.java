@@ -32,6 +32,12 @@ public class FiltroDeAcesso extends OncePerRequestFilter {
     }
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String caminho = request.getRequestURI();
+        return "/api/v1/auth/login".equals(caminho) || "/api/v1/auth/refresh_token".equals(caminho);
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);

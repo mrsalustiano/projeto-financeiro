@@ -1,0 +1,177 @@
+openapi: 3.0.3
+info:
+  title: FinControl Contas
+  version: 0.2.0
+paths:
+  /api/v1/contas:
+    get:
+      operationId: listarContas
+      tags: [contas]
+      security:
+        - bearer: []
+      responses:
+        '200':
+          description: Contas do cliente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContaResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+    post:
+      operationId: criarConta
+      tags: [contas]
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContaRequest'
+      responses:
+        '201':
+          description: Conta criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContaResponse'
+        '400':
+          description: Campo inválido
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '422':
+          description: Limite inválido ou nome já usado
+  /api/v1/contas/{id}:
+    get:
+      operationId: obterConta
+      tags: [contas]
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Conta do cliente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContaResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Não encontrada
+    put:
+      operationId: atualizarConta
+      tags: [contas]
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContaRequest'
+      responses:
+        '200':
+          description: Conta atualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContaResponse'
+        '400':
+          description: Campo inválido
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Não encontrada
+        '422':
+          description: Limite inválido ou nome já usado
+    delete:
+      operationId: excluirConta
+      tags: [contas]
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '204':
+          description: Conta excluída
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Não encontrada
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    ContaRequest:
+      type: object
+      required: [nome, banco, tipo, saldoInicial, dataSaldo]
+      properties:
+        nome:
+          type: string
+          minLength: 1
+          maxLength: 80
+        banco:
+          type: string
+          minLength: 1
+          maxLength: 80
+        tipo:
+          type: string
+          enum: [CORRENTE, POUPANCA, CARTAO_CREDITO, BENEFICIO]
+        saldoInicial:
+          type: string
+          pattern: "^[0-9]+(\\.[0-9]{1,2})?$"
+        dataSaldo:
+          type: string
+          format: date
+        limite:
+          type: string
+          nullable: true
+          pattern: "^[0-9]+(\\.[0-9]{1,2})?$"
+    ContaResponse:
+      type: object
+      required: [id, nome, banco, tipo, saldoInicial, dataSaldo]
+      properties:
+        id:
+          type: string
+        nome:
+          type: string
+        banco:
+          type: string
+        tipo:
+          type: string
+          enum: [CORRENTE, POUPANCA, CARTAO_CREDITO, BENEFICIO]
+        saldoInicial:
+          type: string
+        dataSaldo:
+          type: string
+          format: date
+        limite:
+          type: string
+          nullable: true

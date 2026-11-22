@@ -2,7 +2,6 @@ package br.com.fincontrol.infrastructure.in.web;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.fincontrol.application.AutenticarUsuario;
@@ -11,9 +10,7 @@ import br.com.fincontrol.application.EncerrarSessao;
 import br.com.fincontrol.application.RenovarSessao;
 import br.com.fincontrol.application.SessaoEmitida;
 import br.com.fincontrol.application.UsuarioVisao;
-import br.com.fincontrol.domain.model.Acesso;
 import br.com.fincontrol.domain.model.DuracaoSessao;
-import br.com.fincontrol.domain.service.NaoAutenticadoException;
 import br.com.fincontrol.infrastructure.in.web.api.AuthApi;
 import br.com.fincontrol.infrastructure.in.web.api.model.LoginRequest;
 import br.com.fincontrol.infrastructure.in.web.api.model.TokenResponse;
@@ -49,13 +46,13 @@ public class AuthController implements AuthApi {
 
     @Override
     public ResponseEntity<Void> logout(String refreshToken) {
-        encerrar.executar(atual(), refreshToken);
+        encerrar.executar(SessaoAtual.exigir(), refreshToken);
         return ResponseEntity.noContent().header(HttpHeaders.SET_COOKIE, cookie.apagar().toString()).build();
     }
 
     @Override
     public ResponseEntity<UsuarioResponse> me() {
-        UsuarioVisao visao = consultar.executar(atual());
+        UsuarioVisao visao = consultar.executar(SessaoAtual.exigir());
         UsuarioResponse corpo = new UsuarioResponse(
                 visao.id(), visao.nome(), visao.email(), UsuarioResponse.RoleEnum.fromValue(visao.papel().name()));
         corpo.setClienteId(visao.clienteId());
@@ -71,16 +68,5 @@ public class AuthController implements AuthApi {
     private static ResponseEntity<TokenResponse> comCookie(SessaoEmitida sessao, String setCookie) {
         TokenResponse corpo = new TokenResponse(sessao.accessToken(), "Bearer", DuracaoSessao.ACCESS_SEGUNDOS);
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, setCookie).body(corpo);
-    }
-
-    private static Acesso atual() {
-        if (SecurityContextHolder.getContext().getAuthentication() == null) {
-            throw new NaoAutenticadoException();
-        }
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof Acesso acesso) {
-            return acesso;
-        }
-        throw new NaoAutenticadoException();
     }
 }

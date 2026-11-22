@@ -6,5 +6,8 @@ public enum ErroCodigo {
     LOGIN_BLOQUEADO,
     ACESSO_NEGADO,
     EMAIL_EM_USO,
+    NAO_ENCONTRADO,
+    NOME_EM_USO,
+    LIMITE_INVALIDO,
     ERRO_INTERNO
 }

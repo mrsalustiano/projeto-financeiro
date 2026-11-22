@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,9 +25,12 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.mock.env.MockEnvironment;
 
+import br.com.fincontrol.application.GarantirCategoriasPadrao;
+import br.com.fincontrol.application.GarantirContas;
 import br.com.fincontrol.application.PessoaSeed;
 import br.com.fincontrol.application.SeedConfig;
 import br.com.fincontrol.domain.model.Papel;
+import br.com.fincontrol.domain.model.Usuario;
 import br.com.fincontrol.domain.service.ClienteRepositorio;
 import br.com.fincontrol.domain.service.SenhaPort;
 import br.com.fincontrol.domain.service.UsuarioRepositorio;
@@ -40,6 +44,8 @@ class RefreshESeedTest {
     @Mock private ClienteRepositorio clientes;
     @Mock private UsuarioRepositorio usuarios;
     @Mock private SenhaPort senhas;
+    @Mock private GarantirCategoriasPadrao categorias;
+    @Mock private GarantirContas contas;
 
     @Test
     void refreshERevogacao() throws Exception {
@@ -74,7 +80,7 @@ class RefreshESeedTest {
     @Test
     void seedPulaSemSenhaEQuemJaExiste() {
         SeedConfig vazio = new SeedConfig(" ", List.of());
-        new SeedInicial(clientes, usuarios, senhas, vazio).run(null);
+        new SeedInicial(clientes, usuarios, senhas, vazio, categorias, contas).run(null);
         verify(senhas, never()).hash(anyString());
 
         PessoaSeed master = new PessoaSeed("Master", " Master@Fincontrol.local ", "", Papel.MASTER, true, true);
@@ -84,14 +90,47 @@ class RefreshESeedTest {
         when(usuarios.emailExiste("voce@fincontrol.local")).thenReturn(false);
         when(clientes.inserir("Casa", true)).thenReturn(42L);
 
-        new SeedInicial(clientes, usuarios, senhas, new SeedConfig("segredo", List.of(master, casa))).run(null);
+        new SeedInicial(clientes, usuarios, senhas, new SeedConfig("segredo", List.of(master, casa)), categorias, contas).run(null);
 
         verify(clientes, never()).inserir("", true);
         verify(usuarios).inserir(org.mockito.ArgumentMatchers.argThat(novo -> novo.clienteId() != null && novo.clienteId() == 42L));
+        verify(categorias).executar(42L);
     }
 
     @Test
-    void configuracaoLeCincoPessoas() {
+    void seedLeitorEntraNoClienteDaCasa() {
+        PessoaSeed leitor = new PessoaSeed(
+                "Leitor", "leitor@fincontrol.local", "", Papel.LEITOR, true, true, "voce@fincontrol.local", List.of());
+        when(senhas.hash("segredo")).thenReturn("hash");
+        when(usuarios.emailExiste("leitor@fincontrol.local")).thenReturn(false);
+        when(usuarios.buscarPorEmail("voce@fincontrol.local")).thenReturn(Optional.of(
+                new Usuario(7L, 42L, "Voce", "voce@fincontrol.local", "hash", Papel.ADMIN, true, 0, null)));
+
+        new SeedInicial(clientes, usuarios, senhas, new SeedConfig("segredo", List.of(leitor)), categorias, contas).run(null);
+
+        verify(clientes, never()).inserir(anyString(), org.mockito.ArgumentMatchers.anyBoolean());
+        verify(usuarios).inserir(org.mockito.ArgumentMatchers.argThat(novo -> novo.clienteId() == 42L && novo.papel() == Papel.LEITOR));
+        verify(categorias).executar(42L);
+    }
+
+    @Test
+    void seedDeQuemJaExistePreparaCategorias() {
+        PessoaSeed casa = new PessoaSeed("Voce", "voce@fincontrol.local", "Casa", Papel.ADMIN, true, true);
+        when(senhas.hash("segredo")).thenReturn("hash");
+        when(usuarios.emailExiste("voce@fincontrol.local")).thenReturn(true);
+        when(usuarios.buscarPorEmail("voce@fincontrol.local")).thenReturn(
+                Optional.empty(),
+                Optional.of(new Usuario(7L, 42L, "Voce", "voce@fincontrol.local", "hash", Papel.ADMIN, true, 0, null)));
+
+        SeedInicial seed = new SeedInicial(clientes, usuarios, senhas, new SeedConfig("segredo", List.of(casa)), categorias, contas);
+        seed.run(null);
+        seed.run(null);
+
+        verify(categorias).executar(42L);
+    }
+
+    @Test
+    void configuracaoLeSeisPessoas() {
         MockEnvironment env = new MockEnvironment().withProperty("fincontrol.seed.senha", "segredo");
         prefixos().forEach(prefixo -> {
             env.setProperty(prefixo + ".nome", "Nome");
@@ -101,15 +140,21 @@ class RefreshESeedTest {
         SeedConfig config = new ConfiguracaoSeed().seedConfig(env);
 
         assertThat(config.senha()).isEqualTo("segredo");
-        assertThat(config.pessoas()).hasSize(5);
-        assertThat(config.pessoas().get(2).papel()).isEqualTo(Papel.MASTER);
-        assertThat(config.pessoas().get(3).usuarioAtivo()).isFalse();
-        assertThat(config.pessoas().get(4).clienteAtivo()).isFalse();
+        assertThat(config.pessoas()).hasSize(6);
+        assertThat(config.pessoas().get(0).contas()).extracting(br.com.fincontrol.application.ContaSeed::nome)
+                .containsExactly("Nubank", "Flash");
+        assertThat(config.pessoas().get(0).contas().get(1).tipo()).isEqualTo(br.com.fincontrol.domain.model.TipoConta.BENEFICIO);
+        assertThat(config.pessoas().get(2).contas()).extracting(br.com.fincontrol.application.ContaSeed::nome)
+                .containsExactly("Banco do Brasil");
+        assertThat(config.pessoas().get(3).papel()).isEqualTo(Papel.MASTER);
+        assertThat(config.pessoas().get(4).usuarioAtivo()).isFalse();
+        assertThat(config.pessoas().get(5).clienteAtivo()).isFalse();
     }
 
     private static List<String> prefixos() {
         return List.of(
                 "fincontrol.seed.usuario",
+                "fincontrol.seed.leitor",
                 "fincontrol.seed.mae",
                 "fincontrol.seed.master",
                 "fincontrol.seed.inativo",

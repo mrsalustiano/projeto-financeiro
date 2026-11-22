@@ -17,11 +17,17 @@ public class CriarCliente {
     private final ClienteRepositorio clientes;
     private final UsuarioRepositorio usuarios;
     private final SenhaPort senhas;
+    private final GarantirCategoriasPadrao categorias;
 
-    public CriarCliente(ClienteRepositorio clientes, UsuarioRepositorio usuarios, SenhaPort senhas) {
+    public CriarCliente(
+            ClienteRepositorio clientes,
+            UsuarioRepositorio usuarios,
+            SenhaPort senhas,
+            GarantirCategoriasPadrao categorias) {
         this.clientes = clientes;
         this.usuarios = usuarios;
         this.senhas = senhas;
+        this.categorias = categorias;
     }
 
     @Transactional
@@ -38,6 +44,7 @@ public class CriarCliente {
                 senhas.hash(senha),
                 Papel.ADMIN,
                 true));
+        categorias.executar(clienteId);
         return new ClienteCriado(clienteId, administradorId);
     }
 }

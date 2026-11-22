@@ -82,6 +82,10 @@ class JwtRs256Test {
     @Test
     void chaveAusenteOuInvalidaFalha() {
         assertThatThrownBy(() -> ChavesJwt.ler(" ", "x")).isInstanceOf(IllegalStateException.class);
+        assertThat(ChavesJwt.ler("classpath:jwt/private.pem", "classpath:jwt/public.pem").publica().getAlgorithm())
+                .isEqualTo("RSA");
+        assertThatThrownBy(() -> ChavesJwt.ler("classpath:jwt/ausente.pem", "classpath:jwt/public.pem"))
+                .isInstanceOf(IllegalStateException.class);
         assertThatThrownBy(() -> ChavesJwt.ler(pem("PRIVATE KEY", new byte[] {1}), pem("PUBLIC KEY", new byte[] {1})))
                 .isInstanceOf(IllegalStateException.class);
     }

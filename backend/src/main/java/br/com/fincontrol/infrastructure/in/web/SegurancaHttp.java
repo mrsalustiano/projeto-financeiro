@@ -30,7 +30,12 @@ public class SegurancaHttp {
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/refresh_token").permitAll()
+                .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**", "/contratos/**").permitAll()
                 .requestMatchers("/api/v1/master/**").hasRole("MASTER")
+                .requestMatchers(HttpMethod.GET, "/api/v1/categorias", "/api/v1/categorias/**", "/api/v1/contas", "/api/v1/contas/**")
+                .hasAnyRole("ADMIN", "COLABORADOR", "LEITOR")
+                .requestMatchers("/api/v1/categorias", "/api/v1/categorias/**", "/api/v1/contas", "/api/v1/contas/**")
+                .hasAnyRole("ADMIN", "COLABORADOR")
                 .anyRequest().authenticated());
     }
 }

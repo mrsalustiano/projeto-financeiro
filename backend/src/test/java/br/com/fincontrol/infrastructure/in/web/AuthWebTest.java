@@ -147,6 +147,10 @@ class AuthWebTest {
         MockHttpServletResponse resposta = new MockHttpServletResponse();
 
         filtro.doFilter(ruim, resposta, chain);
+        MockHttpServletRequest login = new MockHttpServletRequest("POST", "/api/v1/auth/login");
+        login.addHeader("Authorization", "Bearer ruim");
+        filtro.doFilter(login, new MockHttpServletResponse(), chain);
+        verify(chain).doFilter(org.mockito.ArgumentMatchers.eq(login), org.mockito.ArgumentMatchers.any());
 
         assertThat(resposta.getStatus()).isEqualTo(401);
         assertThat(resposta.getContentType()).contains("application/problem+json");
