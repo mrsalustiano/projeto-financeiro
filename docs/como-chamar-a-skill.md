@@ -42,7 +42,8 @@ Na fase 1, com a skill fincontrol-backend, ajuste só o refresh_token. Não come
 3. Cria a migração Flyway se nascer tabela.
 4. Cobre com teste de domínio e de caso de uso, sem Testcontainers.
 5. Acrescenta os pedidos no Postman e no Bruno, com sucesso e erro.
-6. Roda `mvn verify` (JaCoCo em 90%, ArchUnit e PMD).
+6. Publica o contrato novo no Swagger, em `/swagger-ui.html`.
+7. Roda `mvn verify` (JaCoCo em 90%, ArchUnit e PMD).
 
 Quando a fase fecha, o chat devolve o aceite e para. Você responde se segue ou se algo precisa mudar.
 

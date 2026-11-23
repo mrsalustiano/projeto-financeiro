@@ -1,0 +1,81 @@
+package br.com.fincontrol;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import static java.util.Map.entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.Test;
+
+class ContratoColecaoTest {
+
+    private static final Map<String, Set<String>> EXIGIDOS = Map.ofEntries(
+            entry("login", Set.of("200", "400", "401", "429")),
+            entry("logout", Set.of("204", "401")),
+            entry("refreshToken", Set.of("200", "401")),
+            entry("me", Set.of("200", "401")),
+            entry("criarCliente", Set.of("201", "400", "401", "403")),
+            entry("listarCategorias", Set.of("200", "401", "403")),
+            entry("criarCategoria", Set.of("201", "400", "401", "403", "422")),
+            entry("atualizarCategoria", Set.of("200", "400", "401", "403", "404", "422")),
+            entry("excluirCategoria", Set.of("204", "401", "403", "404")),
+            entry("listarContas", Set.of("200", "401", "403")),
+            entry("criarConta", Set.of("201", "400", "401", "403", "422")),
+            entry("obterConta", Set.of("200", "401", "403", "404")),
+            entry("atualizarConta", Set.of("200", "400", "401", "403", "404", "422")),
+            entry("excluirConta", Set.of("204", "401", "403", "404")));
+
+    @Test
+    void postmanEBrunoCobremCadaOperationId() throws Exception {
+        String contratos = Files.readString(Path.of("src/main/resources/openapi/auth.yaml"))
+                + Files.readString(Path.of("src/main/resources/openapi/master.yaml"))
+                + Files.readString(Path.of("src/main/resources/openapi/categorias.yaml"))
+                + Files.readString(Path.of("src/main/resources/openapi/contas.yaml"));
+        Set<String> ids = operationIds(contratos);
+        List<String> nomes = new ArrayList<>();
+        nomes.addAll(nomesPostman());
+        nomes.addAll(nomesBruno());
+
+        assertThat(ids).containsExactlyInAnyOrderElementsOf(EXIGIDOS.keySet());
+        EXIGIDOS.forEach((id, status) -> status.forEach(codigo ->
+                assertThat(nomes).anyMatch(nome -> nome.startsWith(id + "_") && nome.contains("_" + codigo))));
+    }
+
+    private static Set<String> operationIds(String yaml) {
+        Matcher matcher = Pattern.compile("operationId:\\s*(\\w+)").matcher(yaml);
+        Set<String> ids = new java.util.HashSet<>();
+        while (matcher.find()) {
+            ids.add(matcher.group(1));
+        }
+        return ids;
+    }
+
+    private static List<String> nomesPostman() throws Exception {
+        String json = Files.readString(Path.of("..", "contracts", "postman", "FinControl.postman_collection.json"));
+        Matcher matcher = Pattern.compile("\"name\"\\s*:\\s*\"([^\"]+)\"").matcher(json);
+        List<String> nomes = new ArrayList<>();
+        while (matcher.find()) {
+            nomes.add(matcher.group(1));
+        }
+        return nomes;
+    }
+
+    private static List<String> nomesBruno() throws Exception {
+        Path pasta = Path.of("..", "contracts", "bruno", "fincontrol");
+        try (Stream<Path> arquivos = Files.walk(pasta)) {
+            return arquivos
+                    .filter(path -> path.toString().endsWith(".bru"))
+                    .filter(path -> !path.toString().contains("environments"))
+                    .map(path -> path.getFileName().toString().replace(".bru", ""))
+                    .toList();
+        }
+    }
+}

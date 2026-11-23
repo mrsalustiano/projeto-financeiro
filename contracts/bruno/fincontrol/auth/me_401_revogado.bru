@@ -1,0 +1,21 @@
+﻿meta {
+  name: me_401_revogado
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/auth/me
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  authorization: Bearer {{accessAntigo}}
+}
+
+
+script:post-response {
+  expect(res.getStatus()).to.equal(401);
+}

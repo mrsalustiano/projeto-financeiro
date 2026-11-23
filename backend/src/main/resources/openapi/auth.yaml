@@ -1,0 +1,116 @@
+openapi: 3.0.3
+info:
+  title: FinControl Auth
+  version: 0.1.0
+paths:
+  /api/v1/auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Sessão iniciada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '400':
+          description: Campo inválido
+        '401':
+          description: Não autenticado
+        '429':
+          description: Login bloqueado
+  /api/v1/auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/RefreshCookie'
+      responses:
+        '204':
+          description: Sessão encerrada
+        '401':
+          description: Não autenticado
+  /api/v1/auth/refresh_token:
+    post:
+      operationId: refreshToken
+      tags: [auth]
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/RefreshCookie'
+      responses:
+        '200':
+          description: Access token renovado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: Não autenticado
+  /api/v1/auth/me:
+    get:
+      operationId: me
+      tags: [auth]
+      security: []
+      responses:
+        '200':
+          description: Usuário do token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioResponse'
+        '401':
+          description: Não autenticado
+components:
+  parameters:
+    RefreshCookie:
+      name: refresh_token
+      in: cookie
+      required: false
+      schema:
+        type: string
+  schemas:
+    LoginRequest:
+      type: object
+      required: [email, senha]
+      properties:
+        email:
+          type: string
+          format: email
+        senha:
+          type: string
+          minLength: 1
+    TokenResponse:
+      type: object
+      required: [accessToken, tokenType, expiresIn]
+      properties:
+        accessToken:
+          type: string
+        tokenType:
+          type: string
+        expiresIn:
+          type: integer
+          format: int32
+    UsuarioResponse:
+      type: object
+      required: [id, nome, email, role]
+      properties:
+        id:
+          type: string
+        nome:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [MASTER, ADMIN, COLABORADOR, LEITOR]
+        clienteId:
+          type: string

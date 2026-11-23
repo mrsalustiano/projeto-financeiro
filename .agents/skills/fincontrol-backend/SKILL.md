@@ -41,6 +41,10 @@ Pacotes: `br.com.fincontrol.domain`, `application`, `infrastructure.in.web`, `in
 
 Erro HTTP só pelo `ApiExceptionHandler`, em `application/problem+json`, com `codigoErro`.
 
+## Swagger
+
+A UI fica em `/swagger-ui.html` e lê os YAML de `src/main/resources/openapi`, publicados em `/contratos`. `/swagger-ui.html`, `/swagger-ui/**`, `/v3/api-docs/**` e `/contratos/**` são públicas. Cada fase que criar um YAML novo acrescenta o nome dele em `springdoc.swagger-ui.urls`. Operação autenticada declara o esquema `bearer`. Login e `refresh_token` ficam sem segurança no contrato. A UI mostra o contrato; não gera outro.
+
 ## Fase 0 — Fundação
 
 Entregar o módulo `backend`, o gerador OpenAPI, o handler de erro, JaCoCo 0.8.16, ArchUnit `archunit-junit6` 1.5.1 e PMD 7. Subir o compose.

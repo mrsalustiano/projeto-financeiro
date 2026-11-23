@@ -1,0 +1,63 @@
+openapi: 3.0.3
+info:
+  title: FinControl Master
+  version: 0.1.0
+paths:
+  /api/v1/master/clientes:
+    post:
+      operationId: criarCliente
+      tags: [master]
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NovoClienteRequest'
+      responses:
+        '201':
+          description: Cliente e administrador criados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClienteCriadoResponse'
+        '400':
+          description: Campo inválido
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '422':
+          description: E-mail já cadastrado
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    NovoClienteRequest:
+      type: object
+      required: [nomeCliente, nomeAdministrador, emailAdministrador, senhaAdministrador]
+      properties:
+        nomeCliente:
+          type: string
+          minLength: 1
+        nomeAdministrador:
+          type: string
+          minLength: 1
+        emailAdministrador:
+          type: string
+          format: email
+        senhaAdministrador:
+          type: string
+          minLength: 8
+    ClienteCriadoResponse:
+      type: object
+      required: [clienteId, administradorId]
+      properties:
+        clienteId:
+          type: string
+        administradorId:
+          type: string

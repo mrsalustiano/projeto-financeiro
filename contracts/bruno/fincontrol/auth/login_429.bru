@@ -1,0 +1,30 @@
+﻿meta {
+  name: login_429
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+{ "email": "{{emailNovo}}", "senha": "errada-demais" }
+}
+script:pre-request {
+  const email = bru.getVar('emailNovo');
+  for (let i = 0; i < 4; i++) {
+    await bru.sendRequest({ method: 'POST', url: bru.getEnvVar('baseUrl') + '/api/v1/auth/login', headers: { 'content-type': 'application/json' }, data: JSON.stringify({ email, senha: 'errada-demais' }) });
+  }
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(429);
+  expect(res.getBody().codigoErro).to.equal('LOGIN_BLOQUEADO');
+}

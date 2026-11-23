@@ -1,0 +1,25 @@
+﻿meta {
+  name: criarCliente_403
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/master/clientes
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  authorization: Bearer {{accessUsuario}}
+}
+
+body:json {
+{ "nomeCliente": "X", "nomeAdministrador": "Y", "emailAdministrador": "y@fincontrol.local", "senhaAdministrador": "segredo123" }
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(403);
+  expect(res.getBody().codigoErro).to.equal('ACESSO_NEGADO');
+}

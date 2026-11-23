@@ -1,7 +1,5 @@
 package br.com.fincontrol.infrastructure.in.web;
 
-import java.net.URI;
-import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -10,6 +8,13 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import br.com.fincontrol.domain.service.AcessoNegadoException;
+import br.com.fincontrol.domain.service.EmailEmUsoException;
+import br.com.fincontrol.domain.service.LimiteInvalidoException;
+import br.com.fincontrol.domain.service.LoginBloqueadoException;
+import br.com.fincontrol.domain.service.NaoAutenticadoException;
+import br.com.fincontrol.domain.service.NaoEncontradoException;
+import br.com.fincontrol.domain.service.NomeEmUsoException;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestControllerAdvice
@@ -17,21 +22,57 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ProblemDetail validacao(MethodArgumentNotValidException ex, HttpServletRequest req) {
-        ProblemDetail problema = base(
-                HttpStatus.BAD_REQUEST,
-                "Dados inválidos",
-                "Revise os campos informados.",
-                req,
-                ErroCodigo.VALIDACAO);
+        ProblemDetail problema = Problemas.de(
+                HttpStatus.BAD_REQUEST, "Dados inválidos", "Revise os campos informados.", req, ErroCodigo.VALIDACAO);
         problema.setProperty("erros", ex.getBindingResult().getFieldErrors().stream()
                 .map(erro -> Map.of("campo", erro.getField(), "mensagem", texto(erro.getDefaultMessage())))
                 .toList());
         return problema;
     }
 
+    @ExceptionHandler(NaoAutenticadoException.class)
+    ProblemDetail naoAutenticado(HttpServletRequest req) {
+        return Problemas.de(HttpStatus.UNAUTHORIZED, "Não autenticado", "Não autenticado.", req, ErroCodigo.NAO_AUTENTICADO);
+    }
+
+    @ExceptionHandler(LoginBloqueadoException.class)
+    ProblemDetail loginBloqueado(HttpServletRequest req) {
+        return Problemas.de(
+                HttpStatus.TOO_MANY_REQUESTS,
+                "Login bloqueado",
+                "Login bloqueado. Tente novamente mais tarde.",
+                req,
+                ErroCodigo.LOGIN_BLOQUEADO);
+    }
+
+    @ExceptionHandler(EmailEmUsoException.class)
+    ProblemDetail emailEmUso(HttpServletRequest req) {
+        return Problemas.de(HttpStatus.valueOf(422), "E-mail em uso", "E-mail já cadastrado.", req, ErroCodigo.EMAIL_EM_USO);
+    }
+
+    @ExceptionHandler(AcessoNegadoException.class)
+    ProblemDetail acessoNegado(HttpServletRequest req) {
+        return Problemas.de(HttpStatus.FORBIDDEN, "Acesso negado", "Acesso negado.", req, ErroCodigo.ACESSO_NEGADO);
+    }
+
+    @ExceptionHandler(NaoEncontradoException.class)
+    ProblemDetail naoEncontrado(HttpServletRequest req) {
+        return Problemas.de(HttpStatus.NOT_FOUND, "Não encontrado", "Não encontrado.", req, ErroCodigo.NAO_ENCONTRADO);
+    }
+
+    @ExceptionHandler(NomeEmUsoException.class)
+    ProblemDetail nomeEmUso(HttpServletRequest req) {
+        return Problemas.de(HttpStatus.valueOf(422), "Nome em uso", "Nome já cadastrado.", req, ErroCodigo.NOME_EM_USO);
+    }
+
+    @ExceptionHandler(LimiteInvalidoException.class)
+    ProblemDetail limiteInvalido(HttpServletRequest req) {
+        return Problemas.de(HttpStatus.valueOf(422), "Limite inválido", "Limite inválido para o tipo da conta.", req, ErroCodigo.LIMITE_INVALIDO);
+    }
+
     @ExceptionHandler(Exception.class)
     ProblemDetail interno(Exception ex, HttpServletRequest req) {
-        return base(
+        return Problemas.de(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Erro interno",
                 "Erro interno. Tente novamente ou contate o suporte.",
@@ -44,15 +85,5 @@ public class ApiExceptionHandler {
             return "Valor inválido.";
         }
         return mensagem;
-    }
-
-    private static ProblemDetail base(
-            HttpStatus status, String title, String detail, HttpServletRequest req, ErroCodigo codigo) {
-        ProblemDetail problema = ProblemDetail.forStatusAndDetail(status, detail);
-        problema.setTitle(title);
-        problema.setType(URI.create("https://fincontrol/errors/" + codigo.name().toLowerCase(Locale.ROOT)));
-        problema.setInstance(URI.create(req.getRequestURI()));
-        problema.setProperty("codigoErro", codigo.name());
-        return problema;
     }
 }

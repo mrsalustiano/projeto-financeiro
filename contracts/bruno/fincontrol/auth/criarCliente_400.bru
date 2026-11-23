@@ -1,0 +1,25 @@
+﻿meta {
+  name: criarCliente_400
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/master/clientes
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  authorization: Bearer {{accessMaster}}
+}
+
+body:json {
+{ "nomeCliente": "", "nomeAdministrador": "Y", "emailAdministrador": "nao-email", "senhaAdministrador": "curta" }
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(400);
+  expect(res.getBody().codigoErro).to.equal('VALIDACAO');
+}
