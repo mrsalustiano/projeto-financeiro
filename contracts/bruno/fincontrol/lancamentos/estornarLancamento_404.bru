@@ -1,0 +1,24 @@
+meta {
+  name: estornarLancamento_404
+  type: http
+  seq: 32
+}
+
+post {
+  url: {{baseUrl}}/api/v1/lancamentos/999999/estorno
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  authorization: Bearer {{accessUsuario}}
+}
+
+body:json {
+{"motivo":"x"}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(404);
+}

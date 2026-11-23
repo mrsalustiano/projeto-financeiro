@@ -27,6 +27,8 @@ springdoc:
         url: /contratos/categorias.yaml
       - name: contas
         url: /contratos/contas.yaml
+      - name: lancamentos
+        url: /contratos/lancamentos.yaml
 
 fincontrol:
   jwt:

@@ -1970,6 +1970,1705 @@
           ]
         }
       ]
+    },
+    {
+      "name": "lancamentos",
+      "item": [
+        {
+          "name": "listarCategorias_200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/categorias"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); const c = pm.response.json().find(x => x.nome === 'Alimentação'); pm.environment.set('idCategoria', c.id); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarContas_200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/contas"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.environment.set('idConta', pm.response.json()[0].id); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "login_200_leitor_lancamentos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{emailLeitor}}\",\"senha\":\"{{senha}}\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.environment.set('accessLeitor', pm.response.json().accessToken); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarLancamentos_200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.expect(pm.response.json()).to.be.an('array'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarLancamentos_401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/lancamentos"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarLancamentos_403",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessMaster}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarLancamento_201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2026-11-10\",\"descricao\":\"Compra\",\"parcelas\":2}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => { pm.response.to.have.status(201); const b = pm.response.json(); pm.expect(b.parcelas).to.have.lengthOf(2); pm.expect(b.grupoParcela).to.be.a('string'); pm.environment.set('idLancamento', b.parcelas[0].id); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarLancamento_400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2026-11-10\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => { pm.response.to.have.status(400); pm.expect(pm.response.json().codigoErro).to.eql('VALIDACAO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarLancamento_401",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2026-11-10\",\"descricao\":\"Compra\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarLancamento_403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessLeitor}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2026-11-10\",\"descricao\":\"Compra\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarLancamento_422",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2026-11-10\",\"descricao\":\"Compra\",\"parcelas\":61}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().codigoErro).to.eql('PARCELA_INVALIDA'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "fecharMes_200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2025/3/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarLancamento_409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2025-03-10\",\"descricao\":\"Compra\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('409', () => { pm.response.to.have.status(409); pm.expect(pm.response.json().codigoErro).to.eql('MES_FECHADO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "reabrirMes_204",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2025/3/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204', () => { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "obterLancamento_200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().id).to.eql(pm.environment.get('idLancamento')); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "obterLancamento_401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "obterLancamento_403",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessMaster}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "obterLancamento_404",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/999999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "atualizarLancamento_200",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2026-11-12\",\"descricao\":\"Compra\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().data).to.eql('2026-11-12'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "atualizarLancamento_400",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2026-11-12\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "atualizarLancamento_401",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2026-11-12\",\"descricao\":\"Compra\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "atualizarLancamento_403",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessLeitor}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2026-11-12\",\"descricao\":\"Compra\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "atualizarLancamento_404",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/999999",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2026-11-12\",\"descricao\":\"Compra\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarLancamento_201_abril",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2025-04-10\",\"descricao\":\"Compra\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => { pm.response.to.have.status(201); pm.environment.set('idAbril', pm.response.json().parcelas[0].id); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "fecharMes_200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2025/4/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "atualizarLancamento_409",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idAbril}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2025-04-11\",\"descricao\":\"Compra\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('409', () => { pm.response.to.have.status(409); pm.expect(pm.response.json().codigoErro).to.eql('MES_FECHADO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "reabrirMes_204",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2025/4/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204', () => { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "estornarLancamento_200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}/estorno",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"motivo\":\"engano\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().estornado).to.eql(true); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "estornarLancamento_400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}/estorno",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"motivo\":\"\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "estornarLancamento_401",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}/estorno",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"motivo\":\"x\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "estornarLancamento_403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessLeitor}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}/estorno",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"motivo\":\"x\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "estornarLancamento_404",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/999999/estorno",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"motivo\":\"x\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarLancamento_201_maio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2025-05-10\",\"descricao\":\"Compra\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => { pm.response.to.have.status(201); pm.environment.set('idMaio', pm.response.json().parcelas[0].id); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "fecharMes_200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2025/5/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "estornarLancamento_409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idMaio}}/estorno",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"motivo\":\"x\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('409', () => { pm.response.to.have.status(409); pm.expect(pm.response.json().codigoErro).to.eql('MES_FECHADO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "reabrirMes_204",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2025/5/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204', () => { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "estornarLancamento_422",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}/estorno",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"motivo\":\"de novo\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().codigoErro).to.eql('ESTORNO_REPETIDO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "atualizarLancamento_422",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2026-11-13\",\"descricao\":\"Compra\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().codigoErro).to.eql('LANCAMENTO_ESTORNADO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarLancamento_201_excluir",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2026-11-11\",\"descricao\":\"Compra\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => { pm.response.to.have.status(201); pm.environment.set('idExcluir', pm.response.json().parcelas[0].id); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "excluirLancamento_204",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idExcluir}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204', () => { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "excluirLancamento_401",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "excluirLancamento_403",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessLeitor}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "excluirLancamento_404",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/999999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarLancamento_201_junho",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2025-06-10\",\"descricao\":\"Compra\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => { pm.response.to.have.status(201); pm.environment.set('idJunho', pm.response.json().parcelas[0].id); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "fecharMes_200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2025/6/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "excluirLancamento_409",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idJunho}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('409', () => { pm.response.to.have.status(409); pm.expect(pm.response.json().codigoErro).to.eql('MES_FECHADO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "reabrirMes_204",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2025/6/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204', () => { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "excluirLancamento_422",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().codigoErro).to.eql('LANCAMENTO_ESTORNADO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "obterSaldoConta_200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/contas/{{idConta}}/saldo"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().saldo).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "obterSaldoConta_401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/contas/{{idConta}}/saldo"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "obterSaldoConta_403",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessMaster}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/contas/{{idConta}}/saldo"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "obterSaldoConta_404",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/contas/999999/saldo"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "meses",
+      "item": [
+        {
+          "name": "listarMeses_200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.expect(pm.response.json()).to.be.an('array'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarMeses_401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/meses"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarMeses_403",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessMaster}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "fecharMes_200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2024/1/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().ano).to.eql(2024); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "fecharMes_400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2026/13/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => { pm.response.to.have.status(400); pm.expect(pm.response.json().codigoErro).to.eql('VALIDACAO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "fecharMes_401",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/meses/2024/2/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "fecharMes_403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessLeitor}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2024/2/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "reabrirMes_204",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2024/1/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204', () => { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "reabrirMes_400",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2026/13/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "reabrirMes_401",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/meses/2024/3/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "reabrirMes_403",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessLeitor}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2024/3/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "reabrirMes_404",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2026/1/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }

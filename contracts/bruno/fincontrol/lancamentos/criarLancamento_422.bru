@@ -1,0 +1,25 @@
+meta {
+  name: criarLancamento_422
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{baseUrl}}/api/v1/lancamentos
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  authorization: Bearer {{accessUsuario}}
+}
+
+body:json {
+{"contaId":"{{idConta}}","categoriaId":"{{idCategoria}}","natureza":"DESPESA","tipoDespesa":"VARIAVEL","valor":"100.00","data":"2026-11-10","descricao":"Compra","parcelas":61}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(422);
+  expect(res.getBody().codigoErro).to.equal('PARCELA_INVALIDA');
+}

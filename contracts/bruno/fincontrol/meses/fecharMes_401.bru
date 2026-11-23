@@ -1,0 +1,15 @@
+meta {
+  name: fecharMes_401
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/v1/meses/2024/2/fechamento
+  body: none
+  auth: none
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(401);
+}

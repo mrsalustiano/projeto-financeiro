@@ -1,0 +1,15 @@
+meta {
+  name: listarMeses_401
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/v1/meses
+  body: none
+  auth: none
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(401);
+}

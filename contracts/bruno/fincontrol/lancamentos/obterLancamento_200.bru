@@ -1,0 +1,20 @@
+meta {
+  name: obterLancamento_200
+  type: http
+  seq: 15
+}
+
+get {
+  url: {{baseUrl}}/api/v1/lancamentos/{{idLancamento}}
+  body: none
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessUsuario}}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(200);
+  expect(res.getBody().id).to.equal(bru.getVar('idLancamento'));
+}

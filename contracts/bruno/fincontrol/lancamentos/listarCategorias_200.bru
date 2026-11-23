@@ -1,0 +1,21 @@
+meta {
+  name: listarCategorias_200
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/categorias
+  body: none
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessUsuario}}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(200);
+  const c = res.getBody().find(x => x.nome === 'Alimentação');
+  bru.setVar('idCategoria', c.id);
+}

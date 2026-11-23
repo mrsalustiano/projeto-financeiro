@@ -1,0 +1,27 @@
+meta {
+  name: criarLancamento_201
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/v1/lancamentos
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  authorization: Bearer {{accessUsuario}}
+  idempotency-key: {{$guid}}
+}
+
+body:json {
+{"contaId":"{{idConta}}","categoriaId":"{{idCategoria}}","natureza":"DESPESA","tipoDespesa":"VARIAVEL","valor":"100.00","data":"2026-11-10","descricao":"Compra","parcelas":2}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(201);
+  expect(res.getBody().parcelas).to.have.lengthOf(2);
+  bru.setVar('idLancamento', res.getBody().parcelas[0].id);
+}

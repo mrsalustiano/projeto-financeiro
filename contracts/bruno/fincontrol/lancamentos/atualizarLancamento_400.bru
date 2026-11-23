@@ -1,0 +1,24 @@
+meta {
+  name: atualizarLancamento_400
+  type: http
+  seq: 20
+}
+
+put {
+  url: {{baseUrl}}/api/v1/lancamentos/{{idLancamento}}
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  authorization: Bearer {{accessUsuario}}
+}
+
+body:json {
+{"contaId":"{{idConta}}","categoriaId":"{{idCategoria}}","natureza":"DESPESA","tipoDespesa":"VARIAVEL","valor":"100.00","data":"2026-11-12","parcelas":1}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(400);
+}

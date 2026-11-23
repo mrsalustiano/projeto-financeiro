@@ -31,14 +31,25 @@ class ContratoColecaoTest {
             entry("criarConta", Set.of("201", "400", "401", "403", "422")),
             entry("obterConta", Set.of("200", "401", "403", "404")),
             entry("atualizarConta", Set.of("200", "400", "401", "403", "404", "422")),
-            entry("excluirConta", Set.of("204", "401", "403", "404")));
+            entry("excluirConta", Set.of("204", "401", "403", "404")),
+            entry("listarLancamentos", Set.of("200", "401", "403")),
+            entry("criarLancamento", Set.of("201", "400", "401", "403", "409", "422")),
+            entry("obterLancamento", Set.of("200", "401", "403", "404")),
+            entry("atualizarLancamento", Set.of("200", "400", "401", "403", "404", "409", "422")),
+            entry("estornarLancamento", Set.of("200", "400", "401", "403", "404", "409", "422")),
+            entry("excluirLancamento", Set.of("204", "401", "403", "404", "409", "422")),
+            entry("obterSaldoConta", Set.of("200", "401", "403", "404")),
+            entry("listarMeses", Set.of("200", "401", "403")),
+            entry("fecharMes", Set.of("200", "400", "401", "403")),
+            entry("reabrirMes", Set.of("204", "400", "401", "403", "404")));
 
     @Test
     void postmanEBrunoCobremCadaOperationId() throws Exception {
         String contratos = Files.readString(Path.of("src/main/resources/openapi/auth.yaml"))
                 + Files.readString(Path.of("src/main/resources/openapi/master.yaml"))
                 + Files.readString(Path.of("src/main/resources/openapi/categorias.yaml"))
-                + Files.readString(Path.of("src/main/resources/openapi/contas.yaml"));
+                + Files.readString(Path.of("src/main/resources/openapi/contas.yaml"))
+                + Files.readString(Path.of("src/main/resources/openapi/lancamentos.yaml"));
         Set<String> ids = operationIds(contratos);
         List<String> nomes = new ArrayList<>();
         nomes.addAll(nomesPostman());

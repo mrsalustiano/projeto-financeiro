@@ -1,0 +1,19 @@
+meta {
+  name: obterSaldoConta_404
+  type: http
+  seq: 52
+}
+
+get {
+  url: {{baseUrl}}/api/v1/contas/999999/saldo
+  body: none
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessUsuario}}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(404);
+}

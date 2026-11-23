@@ -1,0 +1,20 @@
+meta {
+  name: fecharMes_400
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/v1/meses/2026/13/fechamento
+  body: none
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessUsuario}}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(400);
+  expect(res.getBody().codigoErro).to.equal('VALIDACAO');
+}

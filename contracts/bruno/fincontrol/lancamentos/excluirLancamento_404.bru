@@ -1,0 +1,19 @@
+meta {
+  name: excluirLancamento_404
+  type: http
+  seq: 43
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/lancamentos/999999
+  body: none
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessUsuario}}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(404);
+}

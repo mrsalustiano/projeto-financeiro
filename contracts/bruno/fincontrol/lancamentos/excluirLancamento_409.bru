@@ -1,0 +1,20 @@
+meta {
+  name: excluirLancamento_409
+  type: http
+  seq: 46
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/lancamentos/{{idJunho}}
+  body: none
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessUsuario}}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(409);
+  expect(res.getBody().codigoErro).to.equal('MES_FECHADO');
+}

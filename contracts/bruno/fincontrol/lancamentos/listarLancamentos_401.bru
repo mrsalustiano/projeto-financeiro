@@ -1,0 +1,15 @@
+meta {
+  name: listarLancamentos_401
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/lancamentos
+  body: none
+  auth: none
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(401);
+}

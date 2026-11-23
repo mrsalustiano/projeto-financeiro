@@ -1,0 +1,19 @@
+meta {
+  name: reabrirMes_403
+  type: http
+  seq: 11
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/meses/2024/3/fechamento
+  body: none
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessLeitor}}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(403);
+}

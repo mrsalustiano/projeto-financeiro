@@ -10,11 +10,16 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import br.com.fincontrol.domain.service.AcessoNegadoException;
 import br.com.fincontrol.domain.service.EmailEmUsoException;
+import br.com.fincontrol.domain.service.EstornoRepetidoException;
+import br.com.fincontrol.domain.service.IdempotenciaConflitoException;
+import br.com.fincontrol.domain.service.LancamentoEstornadoException;
 import br.com.fincontrol.domain.service.LimiteInvalidoException;
 import br.com.fincontrol.domain.service.LoginBloqueadoException;
+import br.com.fincontrol.domain.service.MesFechadoException;
 import br.com.fincontrol.domain.service.NaoAutenticadoException;
 import br.com.fincontrol.domain.service.NaoEncontradoException;
 import br.com.fincontrol.domain.service.NomeEmUsoException;
+import br.com.fincontrol.domain.service.ParcelaInvalidaException;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestControllerAdvice
@@ -68,6 +73,51 @@ public class ApiExceptionHandler {
     @ExceptionHandler(LimiteInvalidoException.class)
     ProblemDetail limiteInvalido(HttpServletRequest req) {
         return Problemas.de(HttpStatus.valueOf(422), "Limite inválido", "Limite inválido para o tipo da conta.", req, ErroCodigo.LIMITE_INVALIDO);
+    }
+
+    @ExceptionHandler(MesFechadoException.class)
+    ProblemDetail mesFechado(HttpServletRequest req) {
+        return Problemas.de(HttpStatus.CONFLICT, "Mês fechado", "Mês fechado para escrita.", req, ErroCodigo.MES_FECHADO);
+    }
+
+    @ExceptionHandler(IdempotenciaConflitoException.class)
+    ProblemDetail idempotencia(HttpServletRequest req) {
+        return Problemas.de(
+                HttpStatus.CONFLICT,
+                "Idempotência em conflito",
+                "Chave de idempotência já usada com outro corpo.",
+                req,
+                ErroCodigo.IDEMPOTENCIA_CONFLITO);
+    }
+
+    @ExceptionHandler(LancamentoEstornadoException.class)
+    ProblemDetail lancamentoEstornado(HttpServletRequest req) {
+        return Problemas.de(
+                HttpStatus.valueOf(422),
+                "Lançamento estornado",
+                "Lançamento estornado não pode ser alterado.",
+                req,
+                ErroCodigo.LANCAMENTO_ESTORNADO);
+    }
+
+    @ExceptionHandler(EstornoRepetidoException.class)
+    ProblemDetail estornoRepetido(HttpServletRequest req) {
+        return Problemas.de(HttpStatus.valueOf(422), "Estorno repetido", "Lançamento já estornado.", req, ErroCodigo.ESTORNO_REPETIDO);
+    }
+
+    @ExceptionHandler(ParcelaInvalidaException.class)
+    ProblemDetail parcelaInvalida(HttpServletRequest req) {
+        return Problemas.de(
+                HttpStatus.valueOf(422),
+                "Parcela inválida",
+                "Número de parcelas inválido para o valor informado.",
+                req,
+                ErroCodigo.PARCELA_INVALIDA);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    ProblemDetail argumentoInvalido(HttpServletRequest req) {
+        return Problemas.de(HttpStatus.BAD_REQUEST, "Dados inválidos", "Revise os campos informados.", req, ErroCodigo.VALIDACAO);
     }
 
     @ExceptionHandler(Exception.class)

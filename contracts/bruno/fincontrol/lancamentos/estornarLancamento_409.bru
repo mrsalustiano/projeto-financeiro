@@ -1,0 +1,25 @@
+meta {
+  name: estornarLancamento_409
+  type: http
+  seq: 35
+}
+
+post {
+  url: {{baseUrl}}/api/v1/lancamentos/{{idMaio}}/estorno
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  authorization: Bearer {{accessUsuario}}
+}
+
+body:json {
+{"motivo":"x"}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(409);
+  expect(res.getBody().codigoErro).to.equal('MES_FECHADO');
+}
