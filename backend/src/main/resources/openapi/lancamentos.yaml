@@ -340,6 +340,7 @@ components:
           type: string
         categoriaId:
           type: string
+          nullable: true
         natureza:
           type: string
           enum: [RECEITA, DESPESA]

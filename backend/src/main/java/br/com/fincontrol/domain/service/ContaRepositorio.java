@@ -17,5 +17,7 @@ public interface ContaRepositorio {
 
     void atualizar(Conta conta);
 
+    void atualizarIdentificador(long clienteId, long id, String identificador);
+
     boolean excluir(long clienteId, long id);
 }

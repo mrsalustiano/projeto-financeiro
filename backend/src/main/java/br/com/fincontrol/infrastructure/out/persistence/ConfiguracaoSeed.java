@@ -12,6 +12,7 @@ import br.com.fincontrol.application.ContaSeed;
 import br.com.fincontrol.application.LancamentoSeed;
 import br.com.fincontrol.application.PessoaSeed;
 import br.com.fincontrol.application.RecorrenciaSeed;
+import br.com.fincontrol.application.RegraClassificacaoSeed;
 import br.com.fincontrol.application.SeedConfig;
 import br.com.fincontrol.domain.model.Dinheiro;
 import br.com.fincontrol.domain.model.Natureza;
@@ -39,17 +40,24 @@ public class ConfiguracaoSeed {
                                         dinheiro("180.00"), LocalDate.of(2026, 11, 8), "Combustível")),
                         List.of(
                                 new RecorrenciaSeed("Flash", "Benefícios", Natureza.RECEITA, null,
-                                        dinheiro("1570.00"), "Benefício Flash", 0))),
+                                        dinheiro("1570.00"), "Benefício Flash", 0)),
+                        List.of(
+                                new RegraClassificacaoSeed("ITAU", 15, 15,
+                                        new BigDecimal("4800.00"), new BigDecimal("4800.00"), "Salário"),
+                                new RegraClassificacaoSeed("ITAU", 28, 2,
+                                        new BigDecimal("3750.00"), new BigDecimal("3850.00"), "Salário"))),
                 leitor(env),
                 pessoa(env, "fincontrol.seed.mae", "Familia", Papel.ADMIN, true, true, null,
                         List.of(new ContaSeed("Banco do Brasil", "Banco do Brasil", TipoConta.CORRENTE, Saldo.zero(), INICIO)),
                         List.of(),
+                        List.of(),
                         List.of()),
-                pessoa(env, "fincontrol.seed.master", "", Papel.MASTER, true, true, null, List.of(), List.of(), List.of()),
+                pessoa(env, "fincontrol.seed.master", "", Papel.MASTER, true, true, null, List.of(), List.of(), List.of(),
+                        List.of()),
                 pessoa(env, "fincontrol.seed.inativo", "Pessoa inativa", Papel.LEITOR, false, true, null,
-                        List.of(), List.of(), List.of()),
+                        List.of(), List.of(), List.of(), List.of()),
                 pessoa(env, "fincontrol.seed.cliente-inativo", "Cliente inativo", Papel.ADMIN, true, false, null,
-                        List.of(), List.of(), List.of())));
+                        List.of(), List.of(), List.of(), List.of())));
     }
 
     private static PessoaSeed leitor(Environment env) {
@@ -74,7 +82,8 @@ public class ConfiguracaoSeed {
             String emailDoCliente,
             List<ContaSeed> contas,
             List<LancamentoSeed> lancamentos,
-            List<RecorrenciaSeed> recorrencias) {
+            List<RecorrenciaSeed> recorrencias,
+            List<RegraClassificacaoSeed> regras) {
         return new PessoaSeed(
                 env.getProperty(prefixo + ".nome"),
                 env.getProperty(prefixo + ".email"),
@@ -85,7 +94,8 @@ public class ConfiguracaoSeed {
                 emailDoCliente,
                 contas,
                 lancamentos,
-                recorrencias);
+                recorrencias,
+                regras);
     }
 
     private static Dinheiro dinheiro(String valor) {

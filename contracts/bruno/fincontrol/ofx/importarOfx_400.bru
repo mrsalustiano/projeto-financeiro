@@ -1,0 +1,23 @@
+meta {
+  name: importarOfx_400
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/api/v1/ofx/importacoes?contaId={{idConta}}
+  body: multipart-form
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessUsuario}}
+}
+
+body:multipart-form {
+  outro: texto
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(400);
+}

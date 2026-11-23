@@ -1,0 +1,24 @@
+meta {
+  name: importarOfx_422_invalido
+  type: http
+  seq: 13
+}
+
+post {
+  url: {{baseUrl}}/api/v1/ofx/importacoes?contaId={{idConta}}
+  body: multipart-form
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessUsuario}}
+}
+
+body:multipart-form {
+  arquivo: @file(../../../ofx/extrato.csv)
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(422);
+  expect(res.getBody().codigoErro).to.equal('OFX_INVALIDO');
+}

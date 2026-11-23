@@ -7,7 +7,7 @@ public record Lancamento(
         long id,
         long clienteId,
         long contaId,
-        long categoriaId,
+        Long categoriaId,
         Natureza natureza,
         TipoDespesa tipoDespesa,
         Dinheiro valor,
@@ -19,9 +19,31 @@ public record Lancamento(
         Integer totalParcelas,
         Instant estornadoEm,
         String estornoMotivo,
-        String estornadoPor) {
+        String estornadoPor,
+        String fitid) {
 
     public static final int DESCRICAO_MAXIMA = 255;
+
+    public Lancamento(
+            long id,
+            long clienteId,
+            long contaId,
+            Long categoriaId,
+            Natureza natureza,
+            TipoDespesa tipoDespesa,
+            Dinheiro valor,
+            LocalDate data,
+            String descricao,
+            Long parcelaId,
+            String grupoParcela,
+            Integer numeroParcela,
+            Integer totalParcelas,
+            Instant estornadoEm,
+            String estornoMotivo,
+            String estornadoPor) {
+        this(id, clienteId, contaId, categoriaId, natureza, tipoDespesa, valor, data, descricao, parcelaId,
+                grupoParcela, numeroParcela, totalParcelas, estornadoEm, estornoMotivo, estornadoPor, null);
+    }
 
     public Lancamento {
         if (natureza == null || valor == null || data == null) {
@@ -36,12 +58,16 @@ public record Lancamento(
         return estornadoEm != null;
     }
 
+    public boolean semCategoria() {
+        return categoriaId == null;
+    }
+
     public Lancamento estornar(String motivo, String por, Instant quando) {
         if (estornado()) {
             throw new IllegalArgumentException("Lançamento já estornado.");
         }
         return new Lancamento(id, clienteId, contaId, categoriaId, natureza, tipoDespesa, valor, data, descricao,
-                parcelaId, grupoParcela, numeroParcela, totalParcelas, quando, motivo, por);
+                parcelaId, grupoParcela, numeroParcela, totalParcelas, quando, motivo, por, fitid);
     }
 
     public Lancamento editar(
@@ -56,7 +82,7 @@ public record Lancamento(
             throw new IllegalArgumentException("Lançamento estornado não pode ser alterado.");
         }
         return new Lancamento(id, clienteId, novaContaId, novaCategoriaId, novaNatureza, novoTipoDespesa, novoValor,
-                novaData, novaDescricao, parcelaId, grupoParcela, numeroParcela, totalParcelas, null, null, null);
+                novaData, novaDescricao, parcelaId, grupoParcela, numeroParcela, totalParcelas, null, null, null, fitid);
     }
 
     public Lancamento comValor(Dinheiro novoValor) {
@@ -64,7 +90,7 @@ public record Lancamento(
             throw new IllegalArgumentException("Lançamento estornado não pode ser alterado.");
         }
         return new Lancamento(id, clienteId, contaId, categoriaId, natureza, tipoDespesa, novoValor, data, descricao,
-                parcelaId, grupoParcela, numeroParcela, totalParcelas, null, null, null);
+                parcelaId, grupoParcela, numeroParcela, totalParcelas, null, null, null, fitid);
     }
 
     private static String exigirDescricao(String descricao) {

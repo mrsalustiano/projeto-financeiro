@@ -8,6 +8,7 @@ import br.com.fincontrol.application.GarantirCategoriasPadrao;
 import br.com.fincontrol.application.GarantirContas;
 import br.com.fincontrol.application.GarantirLancamentos;
 import br.com.fincontrol.application.GarantirRecorrencias;
+import br.com.fincontrol.application.GarantirRegrasClassificacao;
 import br.com.fincontrol.application.PessoaSeed;
 import br.com.fincontrol.application.SeedConfig;
 import br.com.fincontrol.domain.model.Emails;
@@ -29,6 +30,7 @@ public class SeedInicial implements ApplicationRunner {
     private final GarantirContas contas;
     private final GarantirLancamentos lancamentos;
     private final GarantirRecorrencias recorrencias;
+    private final GarantirRegrasClassificacao regras;
 
     public SeedInicial(
             ClienteRepositorio clientes,
@@ -38,7 +40,8 @@ public class SeedInicial implements ApplicationRunner {
             GarantirCategoriasPadrao categorias,
             GarantirContas contas,
             GarantirLancamentos lancamentos,
-            GarantirRecorrencias recorrencias) {
+            GarantirRecorrencias recorrencias,
+            GarantirRegrasClassificacao regras) {
         this.clientes = clientes;
         this.usuarios = usuarios;
         this.senhas = senhas;
@@ -47,6 +50,7 @@ public class SeedInicial implements ApplicationRunner {
         this.contas = contas;
         this.lancamentos = lancamentos;
         this.recorrencias = recorrencias;
+        this.regras = regras;
     }
 
     @Override
@@ -87,6 +91,7 @@ public class SeedInicial implements ApplicationRunner {
         contas.executar(clienteId, pessoa.contas());
         lancamentos.executar(clienteId, pessoa.lancamentos());
         recorrencias.executar(clienteId, pessoa.recorrencias());
+        regras.executar(clienteId, pessoa.regras());
     }
 
     private Long cliente(PessoaSeed pessoa) {

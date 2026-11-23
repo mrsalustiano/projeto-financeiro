@@ -31,7 +31,7 @@ public class LancamentoJdbc implements LancamentoRepositorio {
     private static final String COLUNAS = """
             SELECT l.id, l.cliente_id, l.conta_id, l.categoria_id, l.natureza, l.tipo_despesa, l.valor, l.data,
                    l.descricao, l.parcela_id, p.grupo AS grupo_parcela, l.numero_parcela, l.total_parcelas,
-                   l.estornado_em, l.estorno_motivo, l.estornado_por
+                   l.estornado_em, l.estorno_motivo, l.estornado_por, l.fitid
             FROM lancamento l
             LEFT JOIN parcela p ON p.id = l.parcela_id
             """;
@@ -48,9 +48,9 @@ public class LancamentoJdbc implements LancamentoRepositorio {
         jdbc.update(
                 """
                 INSERT INTO lancamento (cliente_id, conta_id, categoria_id, natureza, tipo_despesa, valor, data,
-                                        descricao, parcela_id, numero_parcela, total_parcelas)
+                                        descricao, parcela_id, numero_parcela, total_parcelas, fitid)
                 VALUES (:clienteId, :contaId, :categoriaId, :natureza, :tipoDespesa, :valor, :data,
-                        :descricao, :parcelaId, :numeroParcela, :totalParcelas)
+                        :descricao, :parcelaId, :numeroParcela, :totalParcelas, :fitid)
                 """,
                 parametros(lancamento),
                 chaves,
@@ -122,13 +122,26 @@ public class LancamentoJdbc implements LancamentoRepositorio {
     }
 
     @Override
+    public boolean existeFitid(long clienteId, long contaId, String fitid) {
+        Integer total = jdbc.queryForObject(
+                """
+                SELECT COUNT(*) FROM lancamento
+                WHERE cliente_id = :clienteId AND conta_id = :contaId AND fitid = :fitid
+                """,
+                Map.of("clienteId", clienteId, "contaId", contaId, "fitid", fitid),
+                Integer.class);
+        return total != null && total > 0;
+    }
+
+    @Override
     public void atualizar(Lancamento lancamento) {
         jdbc.update(
                 """
                 UPDATE lancamento
                 SET conta_id = :contaId, categoria_id = :categoriaId, natureza = :natureza,
                     tipo_despesa = :tipoDespesa, valor = :valor, data = :data, descricao = :descricao,
-                    estornado_em = :estornadoEm, estorno_motivo = :estornoMotivo, estornado_por = :estornadoPor
+                    estornado_em = :estornadoEm, estorno_motivo = :estornoMotivo, estornado_por = :estornadoPor,
+                    fitid = :fitid
                 WHERE cliente_id = :clienteId AND id = :id
                 """,
                 parametros(lancamento));
@@ -205,10 +218,13 @@ public class LancamentoJdbc implements LancamentoRepositorio {
                 .addValue("estornadoEm", lancamento.estornadoEm() == null
                         ? null : Timestamp.from(lancamento.estornadoEm()))
                 .addValue("estornoMotivo", lancamento.estornoMotivo())
-                .addValue("estornadoPor", lancamento.estornadoPor());
+                .addValue("estornadoPor", lancamento.estornadoPor())
+                .addValue("fitid", lancamento.fitid());
     }
 
     private static Lancamento mapear(ResultSet rs) throws SQLException {
+        long categoriaId = rs.getLong("categoria_id");
+        Long categoria = rs.wasNull() ? null : categoriaId;
         long parcelaId = rs.getLong("parcela_id");
         Long parcela = rs.wasNull() ? null : parcelaId;
         int numero = rs.getInt("numero_parcela");
@@ -222,7 +238,7 @@ public class LancamentoJdbc implements LancamentoRepositorio {
                 rs.getLong("id"),
                 rs.getLong("cliente_id"),
                 rs.getLong("conta_id"),
-                rs.getLong("categoria_id"),
+                categoria,
                 Natureza.valueOf(rs.getString("natureza")),
                 tipo == null ? null : TipoDespesa.valueOf(tipo),
                 new Dinheiro(rs.getBigDecimal("valor")),
@@ -234,6 +250,7 @@ public class LancamentoJdbc implements LancamentoRepositorio {
                 totalParcelas,
                 estornadoEm,
                 rs.getString("estorno_motivo"),
-                rs.getString("estornado_por"));
+                rs.getString("estornado_por"),
+                rs.getString("fitid"));
     }
 }

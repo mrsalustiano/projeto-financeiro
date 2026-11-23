@@ -5,10 +5,13 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import br.com.fincontrol.domain.service.AcessoNegadoException;
+import br.com.fincontrol.domain.service.ArquivoNaoOfxException;
 import br.com.fincontrol.domain.service.EmailEmUsoException;
 import br.com.fincontrol.domain.service.EstornoRepetidoException;
 import br.com.fincontrol.domain.service.IdempotenciaConflitoException;
@@ -19,6 +22,8 @@ import br.com.fincontrol.domain.service.MesFechadoException;
 import br.com.fincontrol.domain.service.NaoAutenticadoException;
 import br.com.fincontrol.domain.service.NaoEncontradoException;
 import br.com.fincontrol.domain.service.NomeEmUsoException;
+import br.com.fincontrol.domain.service.OfxContaDivergenteException;
+import br.com.fincontrol.domain.service.OfxSemTransacaoException;
 import br.com.fincontrol.domain.service.ParcelaInvalidaException;
 import br.com.fincontrol.domain.service.RecorrenciaInativaException;
 import br.com.fincontrol.domain.service.TransferenciaInvalidaException;
@@ -117,6 +122,36 @@ public class ApiExceptionHandler {
                 ErroCodigo.PARCELA_INVALIDA);
     }
 
+    @ExceptionHandler(ArquivoNaoOfxException.class)
+    ProblemDetail arquivoNaoOfx(HttpServletRequest req) {
+        return Problemas.de(
+                HttpStatus.valueOf(422),
+                "Arquivo não é OFX",
+                "Envie um arquivo OFX SGML ou XML.",
+                req,
+                ErroCodigo.OFX_INVALIDO);
+    }
+
+    @ExceptionHandler(OfxSemTransacaoException.class)
+    ProblemDetail ofxSemTransacao(HttpServletRequest req) {
+        return Problemas.de(
+                HttpStatus.valueOf(422),
+                "OFX sem transação",
+                "O arquivo não traz movimento nem rendimento para importar.",
+                req,
+                ErroCodigo.OFX_SEM_TRANSACAO);
+    }
+
+    @ExceptionHandler(OfxContaDivergenteException.class)
+    ProblemDetail ofxContaDivergente(HttpServletRequest req) {
+        return Problemas.de(
+                HttpStatus.valueOf(422),
+                "Arquivo de outro banco",
+                "O arquivo pertence a outro banco que não o da conta escolhida.",
+                req,
+                ErroCodigo.OFX_CONTA_DIVERGENTE);
+    }
+
     @ExceptionHandler(TransferenciaInvalidaException.class)
     ProblemDetail transferenciaInvalida(HttpServletRequest req) {
         return Problemas.de(
@@ -139,6 +174,11 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     ProblemDetail argumentoInvalido(HttpServletRequest req) {
+        return Problemas.de(HttpStatus.BAD_REQUEST, "Dados inválidos", "Revise os campos informados.", req, ErroCodigo.VALIDACAO);
+    }
+
+    @ExceptionHandler({MissingServletRequestPartException.class, MissingServletRequestParameterException.class})
+    ProblemDetail parteAusente(HttpServletRequest req) {
         return Problemas.de(HttpStatus.BAD_REQUEST, "Dados inválidos", "Revise os campos informados.", req, ErroCodigo.VALIDACAO);
     }
 

@@ -1,0 +1,25 @@
+meta {
+  name: sugerirContasOfx_200
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/ofx/sugestoes
+  body: multipart-form
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessUsuario}}
+}
+
+body:multipart-form {
+  arquivo: @file(../../../ofx/NU_7224833363_01OUT2026_22OUT2026.ofx)
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(200);
+  expect(res.getBody().banco).to.equal('Nubank');
+  expect(res.getBody().movimentos).to.equal(38);
+}

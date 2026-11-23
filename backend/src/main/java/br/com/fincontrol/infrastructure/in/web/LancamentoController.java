@@ -107,7 +107,7 @@ public class LancamentoController implements LancamentosApi {
         LancamentoResponse corpo = new LancamentoResponse(
                 Long.toString(lancamento.id()),
                 Long.toString(lancamento.contaId()),
-                Long.toString(lancamento.categoriaId()),
+                lancamento.categoriaId() == null ? null : Long.toString(lancamento.categoriaId()),
                 LancamentoResponse.NaturezaEnum.fromValue(lancamento.natureza().name()),
                 ValoresTexto.texto(lancamento.valor()),
                 lancamento.data(),

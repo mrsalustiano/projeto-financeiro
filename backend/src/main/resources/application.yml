@@ -29,6 +29,8 @@ springdoc:
         url: /contratos/contas.yaml
       - name: lancamentos
         url: /contratos/lancamentos.yaml
+      - name: ofx
+        url: /contratos/ofx.yaml
       - name: transferencias
         url: /contratos/transferencias.yaml
       - name: orcamentos
