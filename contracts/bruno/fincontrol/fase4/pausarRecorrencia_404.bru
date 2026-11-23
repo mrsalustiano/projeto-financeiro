@@ -1,0 +1,19 @@
+meta {
+  name: pausarRecorrencia_404
+  type: http
+  seq: 60
+}
+
+post {
+  url: {{baseUrl}}/api/v1/recorrencias/999999/pausa
+  body: none
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessUsuario}}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(404);
+}

@@ -1,0 +1,19 @@
+meta {
+  name: excluirOrcamento_403
+  type: http
+  seq: 25
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/orcamentos/2026/11/{{idCategoria}}
+  body: none
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessLeitor}}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(403);
+}

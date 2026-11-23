@@ -3669,6 +3669,1754 @@
           ]
         }
       ]
+    },
+    {
+      "name": "fase4",
+      "item": [
+        {
+          "name": "listarTransferencias_200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/transferencias"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.expect(pm.response.json()).to.be.an('array'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarTransferencias_401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/transferencias"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarTransferencias_403",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessMaster}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/transferencias"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarTransferencia_201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/transferencias",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaOrigemId\":\"{{idConta}}\",\"contaDestinoId\":\"{{idContaFlash}}\",\"valor\":\"100.00\",\"data\":\"2026-11-10\",\"descricao\":\"Reserva\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => { pm.response.to.have.status(201); pm.expect(pm.response.json().valor).to.eql('100.00'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarTransferencia_400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/transferencias",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaOrigemId\":\"1\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => { pm.response.to.have.status(400); pm.expect(pm.response.json().codigoErro).to.eql('VALIDACAO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarTransferencia_401",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/transferencias",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaOrigemId\":\"{{idConta}}\",\"contaDestinoId\":\"{{idContaFlash}}\",\"valor\":\"100.00\",\"data\":\"2026-11-10\",\"descricao\":\"Reserva\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarTransferencia_403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessLeitor}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/transferencias",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaOrigemId\":\"{{idConta}}\",\"contaDestinoId\":\"{{idContaFlash}}\",\"valor\":\"100.00\",\"data\":\"2026-11-10\",\"descricao\":\"Reserva\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarTransferencia_404",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/transferencias",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaOrigemId\":\"999999\",\"contaDestinoId\":\"{{idContaFlash}}\",\"valor\":\"100.00\",\"data\":\"2026-11-10\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarTransferencia_422",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/transferencias",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaOrigemId\":\"{{idConta}}\",\"contaDestinoId\":\"{{idConta}}\",\"valor\":\"100.00\",\"data\":\"2026-11-10\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().codigoErro).to.eql('TRANSFERENCIA_INVALIDA'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "fecharMes_200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2025/7/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarTransferencia_409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/transferencias",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaOrigemId\":\"{{idConta}}\",\"contaDestinoId\":\"{{idContaFlash}}\",\"valor\":\"100.00\",\"data\":\"2025-07-10\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('409', () => { pm.response.to.have.status(409); pm.expect(pm.response.json().codigoErro).to.eql('MES_FECHADO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "reabrirMes_204",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2025/7/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204', () => { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarOrcamentos_200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/orcamentos?ano=2026&mes=11"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.expect(pm.response.json()).to.be.an('array'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarOrcamentos_400",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/orcamentos?ano=2026&mes=13"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarOrcamentos_401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/orcamentos?ano=2026&mes=11"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarOrcamentos_403",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessMaster}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/orcamentos?ano=2026&mes=11"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "definirOrcamento_200",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/orcamentos/2026/11/{{idCategoria}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"limite\":\"1000.00\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().limite).to.eql('1000.00'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "definirOrcamento_400",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/orcamentos/2026/11/{{idCategoria}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "definirOrcamento_401",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/orcamentos/2026/11/{{idCategoria}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"limite\":\"1000.00\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "definirOrcamento_403",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessLeitor}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/orcamentos/2026/11/{{idCategoria}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"limite\":\"1000.00\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "definirOrcamento_404",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/orcamentos/2026/11/999999",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"limite\":\"1000.00\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "excluirOrcamento_204",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/orcamentos/2026/11/{{idCategoria}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204', () => { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "excluirOrcamento_400",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/orcamentos/2026/13/{{idCategoria}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "excluirOrcamento_401",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/orcamentos/2026/11/{{idCategoria}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "excluirOrcamento_403",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessLeitor}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/orcamentos/2026/11/{{idCategoria}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "excluirOrcamento_404",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/orcamentos/2026/11/999999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarMetas_200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/metas"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.expect(pm.response.json()).to.be.an('array'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarMetas_401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/metas"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarMetas_403",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessMaster}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/metas"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarMeta_201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/metas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nome\":\"Viagem {{$timestamp}}\",\"valorAlvo\":\"5000.00\",\"dataAlvo\":\"2027-12-31\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => { pm.response.to.have.status(201); const b = pm.response.json(); pm.environment.set('idMeta', b.id); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarMeta_400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/metas",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarMeta_401",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/metas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nome\":\"Viagem {{$timestamp}}\",\"valorAlvo\":\"5000.00\",\"dataAlvo\":\"2027-12-31\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarMeta_403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessLeitor}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/metas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nome\":\"Viagem {{$timestamp}}\",\"valorAlvo\":\"5000.00\",\"dataAlvo\":\"2027-12-31\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarMeta_422",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/metas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nome\":\"{{nomeMeta}}\",\"valorAlvo\":\"5000.00\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().codigoErro).to.eql('NOME_EM_USO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "obterMeta_200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/metas/{{idMeta}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "obterMeta_401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/metas/{{idMeta}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "obterMeta_403",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessMaster}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/metas/{{idMeta}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "obterMeta_404",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/metas/999999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarAportes_200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/metas/{{idMeta}}/aportes"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.expect(pm.response.json()).to.be.an('array'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarAportes_401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/metas/{{idMeta}}/aportes"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarAportes_403",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessMaster}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/metas/{{idMeta}}/aportes"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarAportes_404",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/metas/999999/aportes"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarAporte_201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/metas/{{idMeta}}/aportes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"valor\":\"250.00\",\"data\":\"2026-11-10\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => { pm.response.to.have.status(201); pm.expect(pm.response.json().valor).to.eql('250.00'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarAporte_400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/metas/{{idMeta}}/aportes",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarAporte_401",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/metas/{{idMeta}}/aportes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"valor\":\"250.00\",\"data\":\"2026-11-10\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarAporte_403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessLeitor}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/metas/{{idMeta}}/aportes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"valor\":\"250.00\",\"data\":\"2026-11-10\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarAporte_404",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/metas/999999/aportes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"valor\":\"250.00\",\"data\":\"2026-11-10\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarRecorrencias_200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/recorrencias"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.expect(pm.response.json()).to.be.an('array'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarRecorrencias_401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/recorrencias"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarRecorrencias_403",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessMaster}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/recorrencias"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarRecorrencia_201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/recorrencias",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idContaFlash}}\",\"categoriaId\":\"{{idCategoriaBeneficios}}\",\"natureza\":\"RECEITA\",\"valor\":\"1570.00\",\"descricao\":\"Benefício Flash {{$timestamp}}\",\"diaDoMes\":0}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => { pm.response.to.have.status(201); const b = pm.response.json(); pm.environment.set('idRecorrencia', b.id); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarRecorrencia_400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/recorrencias",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarRecorrencia_401",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/recorrencias",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idContaFlash}}\",\"categoriaId\":\"{{idCategoriaBeneficios}}\",\"natureza\":\"RECEITA\",\"valor\":\"1570.00\",\"descricao\":\"Benefício Flash {{$timestamp}}\",\"diaDoMes\":0}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarRecorrencia_403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessLeitor}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/recorrencias",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idContaFlash}}\",\"categoriaId\":\"{{idCategoriaBeneficios}}\",\"natureza\":\"RECEITA\",\"valor\":\"1570.00\",\"descricao\":\"Benefício Flash {{$timestamp}}\",\"diaDoMes\":0}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarRecorrencia_404",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/recorrencias",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"999999\",\"categoriaId\":\"{{idCategoriaBeneficios}}\",\"natureza\":\"RECEITA\",\"valor\":\"1570.00\",\"descricao\":\"Sem conta\",\"diaDoMes\":0}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarRecorrencia_422",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/recorrencias",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idContaFlash}}\",\"categoriaId\":\"{{idCategoriaBeneficios}}\",\"natureza\":\"RECEITA\",\"valor\":\"1570.00\",\"descricao\":\"{{nomeRecorrencia}}\",\"diaDoMes\":0}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().codigoErro).to.eql('NOME_EM_USO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "pausarRecorrencia_200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/recorrencias/{{idRecorrencia}}/pausa"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().ativa).to.eql(false); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "pausarRecorrencia_401",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/recorrencias/{{idRecorrencia}}/pausa"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "pausarRecorrencia_403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessLeitor}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/recorrencias/{{idRecorrencia}}/pausa"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "pausarRecorrencia_404",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/recorrencias/999999/pausa"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "pausarRecorrencia_422",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/recorrencias/{{idRecorrencia}}/pausa"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().codigoErro).to.eql('RECORRENCIA_INATIVA'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "retomarRecorrencia_200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/recorrencias/{{idRecorrencia}}/retomada"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().ativa).to.eql(true); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "retomarRecorrencia_401",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/recorrencias/{{idRecorrencia}}/retomada"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "retomarRecorrencia_403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessLeitor}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/recorrencias/{{idRecorrencia}}/retomada"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "retomarRecorrencia_404",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/recorrencias/999999/retomada"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "retomarRecorrencia_422",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/recorrencias/{{idRecorrencia}}/retomada"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().codigoErro).to.eql('RECORRENCIA_INATIVA'); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }

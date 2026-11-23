@@ -1,0 +1,24 @@
+meta {
+  name: criarRecorrencia_403
+  type: http
+  seq: 54
+}
+
+post {
+  url: {{baseUrl}}/api/v1/recorrencias
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  authorization: Bearer {{accessLeitor}}
+}
+
+body:json {
+{"contaId":"{{idContaFlash}}","categoriaId":"{{idCategoriaBeneficios}}","natureza":"RECEITA","valor":"1570.00","descricao":"Benefício Flash {{$timestamp}}","diaDoMes":0}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(403);
+}

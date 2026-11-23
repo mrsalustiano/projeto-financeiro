@@ -1,0 +1,24 @@
+meta {
+  name: criarAporte_404
+  type: http
+  seq: 47
+}
+
+post {
+  url: {{baseUrl}}/api/v1/metas/999999/aportes
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  authorization: Bearer {{accessUsuario}}
+}
+
+body:json {
+{"valor":"250.00","data":"2026-11-10"}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(404);
+}

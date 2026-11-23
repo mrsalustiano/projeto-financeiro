@@ -1,0 +1,25 @@
+meta {
+  name: criarTransferencia_400
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/v1/transferencias
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  authorization: Bearer {{accessUsuario}}
+}
+
+body:json {
+{"contaOrigemId":"1"}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(400);
+  expect(res.getBody().codigoErro).to.equal('VALIDACAO');
+}

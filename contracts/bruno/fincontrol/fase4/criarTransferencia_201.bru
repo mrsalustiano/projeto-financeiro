@@ -1,0 +1,25 @@
+meta {
+  name: criarTransferencia_201
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/transferencias
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  authorization: Bearer {{accessUsuario}}
+}
+
+body:json {
+{"contaOrigemId":"{{idConta}}","contaDestinoId":"{{idContaFlash}}","valor":"100.00","data":"2026-11-10","descricao":"Reserva"}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(201);
+  expect(res.getBody().valor).to.equal('100.00');
+}

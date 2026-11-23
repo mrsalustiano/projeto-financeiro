@@ -1,0 +1,96 @@
+openapi: 3.0.3
+info:
+  title: FinControl Transferências
+  version: 0.4.0
+paths:
+  /api/v1/transferencias:
+    get:
+      operationId: listarTransferencias
+      tags: [transferencias]
+      security:
+        - bearer: []
+      responses:
+        '200':
+          description: Transferências do cliente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransferenciaResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+    post:
+      operationId: criarTransferencia
+      tags: [transferencias]
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferenciaRequest'
+      responses:
+        '201':
+          description: Transferência criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransferenciaResponse'
+        '400':
+          description: Campo inválido
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Conta inexistente
+        '409':
+          description: Mês fechado
+        '422':
+          description: Conta de origem igual à de destino
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    TransferenciaRequest:
+      type: object
+      required: [contaOrigemId, contaDestinoId, valor, data]
+      properties:
+        contaOrigemId:
+          type: string
+        contaDestinoId:
+          type: string
+        valor:
+          type: string
+          pattern: "^[0-9]+(\\.[0-9]{1,2})?$"
+        data:
+          type: string
+          format: date
+        descricao:
+          type: string
+          maxLength: 255
+    TransferenciaResponse:
+      type: object
+      required: [id, contaOrigemId, contaDestinoId, valor, data]
+      properties:
+        id:
+          type: string
+        contaOrigemId:
+          type: string
+        contaDestinoId:
+          type: string
+        valor:
+          type: string
+        data:
+          type: string
+          format: date
+        descricao:
+          type: string
+          nullable: true

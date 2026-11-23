@@ -41,7 +41,21 @@ class ContratoColecaoTest {
             entry("obterSaldoConta", Set.of("200", "401", "403", "404")),
             entry("listarMeses", Set.of("200", "401", "403")),
             entry("fecharMes", Set.of("200", "400", "401", "403")),
-            entry("reabrirMes", Set.of("204", "400", "401", "403", "404")));
+            entry("reabrirMes", Set.of("204", "400", "401", "403", "404")),
+            entry("listarTransferencias", Set.of("200", "401", "403")),
+            entry("criarTransferencia", Set.of("201", "400", "401", "403", "404", "409", "422")),
+            entry("listarOrcamentos", Set.of("200", "400", "401", "403")),
+            entry("definirOrcamento", Set.of("200", "400", "401", "403", "404")),
+            entry("excluirOrcamento", Set.of("204", "400", "401", "403", "404")),
+            entry("listarMetas", Set.of("200", "401", "403")),
+            entry("criarMeta", Set.of("201", "400", "401", "403", "422")),
+            entry("obterMeta", Set.of("200", "401", "403", "404")),
+            entry("listarAportes", Set.of("200", "401", "403", "404")),
+            entry("criarAporte", Set.of("201", "400", "401", "403", "404")),
+            entry("listarRecorrencias", Set.of("200", "401", "403")),
+            entry("criarRecorrencia", Set.of("201", "400", "401", "403", "404", "422")),
+            entry("pausarRecorrencia", Set.of("200", "401", "403", "404", "422")),
+            entry("retomarRecorrencia", Set.of("200", "401", "403", "404", "422")));
 
     @Test
     void postmanEBrunoCobremCadaOperationId() throws Exception {
@@ -49,7 +63,11 @@ class ContratoColecaoTest {
                 + Files.readString(Path.of("src/main/resources/openapi/master.yaml"))
                 + Files.readString(Path.of("src/main/resources/openapi/categorias.yaml"))
                 + Files.readString(Path.of("src/main/resources/openapi/contas.yaml"))
-                + Files.readString(Path.of("src/main/resources/openapi/lancamentos.yaml"));
+                + Files.readString(Path.of("src/main/resources/openapi/lancamentos.yaml"))
+                + Files.readString(Path.of("src/main/resources/openapi/transferencias.yaml"))
+                + Files.readString(Path.of("src/main/resources/openapi/orcamentos.yaml"))
+                + Files.readString(Path.of("src/main/resources/openapi/metas.yaml"))
+                + Files.readString(Path.of("src/main/resources/openapi/recorrencias.yaml"));
         Set<String> ids = operationIds(contratos);
         List<String> nomes = new ArrayList<>();
         nomes.addAll(nomesPostman());

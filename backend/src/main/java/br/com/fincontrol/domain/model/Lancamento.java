@@ -59,6 +59,14 @@ public record Lancamento(
                 novaData, novaDescricao, parcelaId, grupoParcela, numeroParcela, totalParcelas, null, null, null);
     }
 
+    public Lancamento comValor(Dinheiro novoValor) {
+        if (estornado()) {
+            throw new IllegalArgumentException("Lançamento estornado não pode ser alterado.");
+        }
+        return new Lancamento(id, clienteId, contaId, categoriaId, natureza, tipoDespesa, novoValor, data, descricao,
+                parcelaId, grupoParcela, numeroParcela, totalParcelas, null, null, null);
+    }
+
     private static String exigirDescricao(String descricao) {
         if (descricao == null || descricao.isBlank()) {
             throw new IllegalArgumentException("Descrição obrigatória.");

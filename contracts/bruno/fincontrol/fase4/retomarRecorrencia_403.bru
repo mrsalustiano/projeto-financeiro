@@ -1,0 +1,19 @@
+meta {
+  name: retomarRecorrencia_403
+  type: http
+  seq: 64
+}
+
+post {
+  url: {{baseUrl}}/api/v1/recorrencias/{{idRecorrencia}}/retomada
+  body: none
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessLeitor}}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(403);
+}

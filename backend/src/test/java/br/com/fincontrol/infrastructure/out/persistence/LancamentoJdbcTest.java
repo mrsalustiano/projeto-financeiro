@@ -137,6 +137,8 @@ class LancamentoJdbcTest {
         when(rs.getBigDecimal("saldo_inicial")).thenReturn(new BigDecimal("100.00"));
         when(rs.getBigDecimal("creditos")).thenReturn(new BigDecimal("50.50"));
         when(rs.getBigDecimal("debitos")).thenReturn(new BigDecimal("30.25"));
+        when(rs.getBigDecimal("entradas")).thenReturn(new BigDecimal("40.00"));
+        when(rs.getBigDecimal("saidas")).thenReturn(new BigDecimal("10.00"));
         when(jdbc.query(contains("FROM conta"), anyMap(), any(RowMapper.class))).thenAnswer(inv -> {
             RowMapper<?> mapper = inv.getArgument(2);
             return List.of(mapper.mapRow(rs, 0));
@@ -146,7 +148,20 @@ class LancamentoJdbcTest {
         repo.atualizar(lancamento(null, null));
         assertThat(repo.excluir(42L, 11L)).isTrue();
         assertThat(repo.excluir(42L, 11L)).isFalse();
-        assertThat(repo.saldo(42L, 1L).orElseThrow().saldo()).isEqualByComparingTo("120.25");
+        assertThat(repo.saldo(42L, 1L).orElseThrow().saldo()).isEqualByComparingTo("150.25");
+    }
+
+    @Test
+    void gastoPorCategoriaSomaDespesasNaoEstornadas() {
+        when(jdbc.queryForObject(contains("SUM(valor)"), any(SqlParameterSource.class),
+                org.mockito.ArgumentMatchers.eq(BigDecimal.class)))
+                .thenReturn(new BigDecimal("320.00"), (BigDecimal) null);
+        LancamentoJdbc repo = new LancamentoJdbc(jdbc);
+
+        assertThat(repo.gastoPorCategoria(42L, 2L, LocalDate.of(2026, 11, 1), LocalDate.of(2026, 11, 30)))
+                .isEqualByComparingTo("320.00");
+        assertThat(repo.gastoPorCategoria(42L, 2L, LocalDate.of(2026, 11, 1), LocalDate.of(2026, 11, 30)))
+                .isEqualByComparingTo("0");
     }
 
     @Test

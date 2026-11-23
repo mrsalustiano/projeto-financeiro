@@ -1,0 +1,194 @@
+openapi: 3.0.3
+info:
+  title: FinControl Metas
+  version: 0.4.0
+paths:
+  /api/v1/metas:
+    get:
+      operationId: listarMetas
+      tags: [metas]
+      security:
+        - bearer: []
+      responses:
+        '200':
+          description: Metas do cliente com progresso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MetaResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+    post:
+      operationId: criarMeta
+      tags: [metas]
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MetaRequest'
+      responses:
+        '201':
+          description: Meta criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetaResponse'
+        '400':
+          description: Campo inválido
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '422':
+          description: Nome em uso
+  /api/v1/metas/{id}:
+    get:
+      operationId: obterMeta
+      tags: [metas]
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Meta com progresso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetaResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Não encontrada
+  /api/v1/metas/{id}/aportes:
+    get:
+      operationId: listarAportes
+      tags: [metas]
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Aportes da meta
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AporteResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Meta não encontrada
+    post:
+      operationId: criarAporte
+      tags: [metas]
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AporteRequest'
+      responses:
+        '201':
+          description: Aporte criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AporteResponse'
+        '400':
+          description: Campo inválido
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Meta não encontrada
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    MetaRequest:
+      type: object
+      required: [nome, valorAlvo]
+      properties:
+        nome:
+          type: string
+          minLength: 1
+          maxLength: 80
+        valorAlvo:
+          type: string
+          pattern: "^[0-9]+(\\.[0-9]{1,2})?$"
+        dataAlvo:
+          type: string
+          format: date
+          nullable: true
+    MetaResponse:
+      type: object
+      required: [id, nome, valorAlvo, aportado, percentual, alcancada]
+      properties:
+        id:
+          type: string
+        nome:
+          type: string
+        valorAlvo:
+          type: string
+        dataAlvo:
+          type: string
+          format: date
+          nullable: true
+        aportado:
+          type: string
+        percentual:
+          type: string
+        alcancada:
+          type: boolean
+    AporteRequest:
+      type: object
+      required: [valor, data]
+      properties:
+        valor:
+          type: string
+          pattern: "^[0-9]+(\\.[0-9]{1,2})?$"
+        data:
+          type: string
+          format: date
+    AporteResponse:
+      type: object
+      required: [id, metaId, valor, data]
+      properties:
+        id:
+          type: string
+        metaId:
+          type: string
+        valor:
+          type: string
+        data:
+          type: string
+          format: date

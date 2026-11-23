@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 
 import br.com.fincontrol.application.GarantirCategoriasPadrao;
 import br.com.fincontrol.application.GarantirContas;
+import br.com.fincontrol.application.GarantirLancamentos;
+import br.com.fincontrol.application.GarantirRecorrencias;
 import br.com.fincontrol.application.PessoaSeed;
 import br.com.fincontrol.application.SeedConfig;
 import br.com.fincontrol.domain.model.Emails;
@@ -25,6 +27,8 @@ public class SeedInicial implements ApplicationRunner {
     private final SeedConfig config;
     private final GarantirCategoriasPadrao categorias;
     private final GarantirContas contas;
+    private final GarantirLancamentos lancamentos;
+    private final GarantirRecorrencias recorrencias;
 
     public SeedInicial(
             ClienteRepositorio clientes,
@@ -32,13 +36,17 @@ public class SeedInicial implements ApplicationRunner {
             SenhaPort senhas,
             SeedConfig config,
             GarantirCategoriasPadrao categorias,
-            GarantirContas contas) {
+            GarantirContas contas,
+            GarantirLancamentos lancamentos,
+            GarantirRecorrencias recorrencias) {
         this.clientes = clientes;
         this.usuarios = usuarios;
         this.senhas = senhas;
         this.config = config;
         this.categorias = categorias;
         this.contas = contas;
+        this.lancamentos = lancamentos;
+        this.recorrencias = recorrencias;
     }
 
     @Override
@@ -77,6 +85,8 @@ public class SeedInicial implements ApplicationRunner {
         }
         categorias.executar(clienteId);
         contas.executar(clienteId, pessoa.contas());
+        lancamentos.executar(clienteId, pessoa.lancamentos());
+        recorrencias.executar(clienteId, pessoa.recorrencias());
     }
 
     private Long cliente(PessoaSeed pessoa) {

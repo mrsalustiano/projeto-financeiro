@@ -1,0 +1,20 @@
+meta {
+  name: retomarRecorrencia_422
+  type: http
+  seq: 66
+}
+
+post {
+  url: {{baseUrl}}/api/v1/recorrencias/{{idRecorrencia}}/retomada
+  body: none
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessUsuario}}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(422);
+  expect(res.getBody().codigoErro).to.equal('RECORRENCIA_INATIVA');
+}

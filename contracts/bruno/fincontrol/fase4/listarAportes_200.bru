@@ -1,0 +1,20 @@
+meta {
+  name: listarAportes_200
+  type: http
+  seq: 39
+}
+
+get {
+  url: {{baseUrl}}/api/v1/metas/{{idMeta}}/aportes
+  body: none
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessUsuario}}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(200);
+  expect(res.getBody()).to.be.an('array');
+}

@@ -1,0 +1,19 @@
+meta {
+  name: listarAportes_403
+  type: http
+  seq: 41
+}
+
+get {
+  url: {{baseUrl}}/api/v1/metas/{{idMeta}}/aportes
+  body: none
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessMaster}}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(403);
+}

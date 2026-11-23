@@ -29,6 +29,14 @@ springdoc:
         url: /contratos/contas.yaml
       - name: lancamentos
         url: /contratos/lancamentos.yaml
+      - name: transferencias
+        url: /contratos/transferencias.yaml
+      - name: orcamentos
+        url: /contratos/orcamentos.yaml
+      - name: metas
+        url: /contratos/metas.yaml
+      - name: recorrencias
+        url: /contratos/recorrencias.yaml
 
 fincontrol:
   jwt:

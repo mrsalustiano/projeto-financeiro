@@ -1,0 +1,141 @@
+openapi: 3.0.3
+info:
+  title: FinControl Orçamentos
+  version: 0.4.0
+paths:
+  /api/v1/orcamentos:
+    get:
+      operationId: listarOrcamentos
+      tags: [orcamentos]
+      security:
+        - bearer: []
+      parameters:
+        - name: ano
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: mes
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Orçamentos do mês com alerta calculado
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrcamentoResponse'
+        '400':
+          description: Ano ou mês inválido
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+  /api/v1/orcamentos/{ano}/{mes}/{categoriaId}:
+    put:
+      operationId: definirOrcamento
+      tags: [orcamentos]
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/Ano'
+        - $ref: '#/components/parameters/Mes'
+        - $ref: '#/components/parameters/CategoriaId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrcamentoRequest'
+      responses:
+        '200':
+          description: Orçamento definido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrcamentoResponse'
+        '400':
+          description: Campo inválido
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Categoria inexistente
+    delete:
+      operationId: excluirOrcamento
+      tags: [orcamentos]
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/Ano'
+        - $ref: '#/components/parameters/Mes'
+        - $ref: '#/components/parameters/CategoriaId'
+      responses:
+        '204':
+          description: Orçamento excluído
+        '400':
+          description: Ano ou mês inválido
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Orçamento inexistente
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Ano:
+      name: ano
+      in: path
+      required: true
+      schema:
+        type: string
+    Mes:
+      name: mes
+      in: path
+      required: true
+      schema:
+        type: string
+    CategoriaId:
+      name: categoriaId
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    OrcamentoRequest:
+      type: object
+      required: [limite]
+      properties:
+        limite:
+          type: string
+          pattern: "^[0-9]+(\\.[0-9]{1,2})?$"
+    OrcamentoResponse:
+      type: object
+      required: [categoriaId, ano, mes, limite, gasto, percentual, alerta, estourou]
+      properties:
+        categoriaId:
+          type: string
+        ano:
+          type: integer
+        mes:
+          type: integer
+        limite:
+          type: string
+        gasto:
+          type: string
+        percentual:
+          type: string
+        alerta:
+          type: boolean
+        estourou:
+          type: boolean

@@ -1,0 +1,15 @@
+meta {
+  name: listarAportes_401
+  type: http
+  seq: 40
+}
+
+get {
+  url: {{baseUrl}}/api/v1/metas/{{idMeta}}/aportes
+  body: none
+  auth: none
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(401);
+}

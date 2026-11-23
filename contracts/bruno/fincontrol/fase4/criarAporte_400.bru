@@ -1,0 +1,24 @@
+meta {
+  name: criarAporte_400
+  type: http
+  seq: 44
+}
+
+post {
+  url: {{baseUrl}}/api/v1/metas/{{idMeta}}/aportes
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  authorization: Bearer {{accessUsuario}}
+}
+
+body:json {
+{}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(400);
+}
