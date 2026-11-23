@@ -36,6 +36,8 @@ public class SegurancaHttp {
                         "/api/v1/lancamentos", "/api/v1/lancamentos/**", "/api/v1/meses", "/api/v1/meses/**",
                         "/api/v1/conciliacoes", "/api/v1/conciliacoes/**", "/api/v1/comprovantes", "/api/v1/comprovantes/**")
                 .hasAnyRole("ADMIN", "COLABORADOR", "LEITOR")
+                .requestMatchers(HttpMethod.POST, "/api/v1/analise")
+                .hasAnyRole("ADMIN", "COLABORADOR", "LEITOR")
                 .requestMatchers("/api/v1/categorias", "/api/v1/categorias/**", "/api/v1/contas", "/api/v1/contas/**",
                         "/api/v1/lancamentos", "/api/v1/lancamentos/**", "/api/v1/meses", "/api/v1/meses/**",
                         "/api/v1/ofx", "/api/v1/ofx/**",

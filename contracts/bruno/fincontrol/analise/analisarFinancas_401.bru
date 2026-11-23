@@ -1,0 +1,23 @@
+meta {
+  name: analisarFinancas_401
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/analise
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  {"mes":"2026-11","tipo":"PRESUNTIVA","pergunta":"onde posso cortar gastos?"}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(401);
+}

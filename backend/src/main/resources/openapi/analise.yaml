@@ -1,0 +1,79 @@
+openapi: 3.0.3
+info:
+  title: FinControl Análise
+  version: 0.8.0
+paths:
+  /api/v1/analise:
+    post:
+      operationId: analisarFinancas
+      tags: [analise]
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnaliseRequest'
+      responses:
+        '200':
+          description: Análise gerada pelo provedor configurado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnaliseResponse'
+        '400':
+          description: Mês, tipo ou pergunta inválidos
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '422':
+          description: Resposta do provedor fora do schema
+        '503':
+          description: Análise desabilitada ou provedor indisponível
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    AnaliseRequest:
+      type: object
+      required: [mes, tipo]
+      properties:
+        mes:
+          type: string
+          pattern: '^\d{4}-(0[1-9]|1[0-2])$'
+          example: '2026-11'
+        tipo:
+          type: string
+          enum: [PRESUNTIVA, COMPARATIVA, COMPORTAMENTAL]
+        pergunta:
+          type: string
+          maxLength: 500
+    AnaliseResponse:
+      type: object
+      required: [mes, tipo, provedor, modelo, resumo, insights, acoes]
+      properties:
+        mes:
+          type: string
+        tipo:
+          type: string
+          enum: [PRESUNTIVA, COMPARATIVA, COMPORTAMENTAL]
+        provedor:
+          type: string
+          enum: [ollama, anthropic, openai]
+        modelo:
+          type: string
+        resumo:
+          type: string
+        insights:
+          type: array
+          items:
+            type: string
+        acoes:
+          type: array
+          items:
+            type: string
