@@ -81,6 +81,13 @@ public class ContaJdbc implements ContaRepositorio {
     }
 
     @Override
+    public void atualizarIdentificador(long clienteId, long id, String identificador) {
+        jdbc.update(
+                "UPDATE conta SET identificador_conta = :identificador WHERE cliente_id = :clienteId AND id = :id",
+                Map.of("clienteId", clienteId, "id", id, "identificador", identificador));
+    }
+
+    @Override
     public boolean excluir(long clienteId, long id) {
         return jdbc.update(
                 "DELETE FROM conta WHERE cliente_id = :clienteId AND id = :id",

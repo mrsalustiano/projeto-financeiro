@@ -55,7 +55,9 @@ class ContratoColecaoTest {
             entry("listarRecorrencias", Set.of("200", "401", "403")),
             entry("criarRecorrencia", Set.of("201", "400", "401", "403", "404", "422")),
             entry("pausarRecorrencia", Set.of("200", "401", "403", "404", "422")),
-            entry("retomarRecorrencia", Set.of("200", "401", "403", "404", "422")));
+            entry("retomarRecorrencia", Set.of("200", "401", "403", "404", "422")),
+            entry("sugerirContasOfx", Set.of("200", "400", "401", "403", "422")),
+            entry("importarOfx", Set.of("201", "400", "401", "403", "404", "422")));
 
     @Test
     void postmanEBrunoCobremCadaOperationId() throws Exception {
@@ -67,7 +69,8 @@ class ContratoColecaoTest {
                 + Files.readString(Path.of("src/main/resources/openapi/transferencias.yaml"))
                 + Files.readString(Path.of("src/main/resources/openapi/orcamentos.yaml"))
                 + Files.readString(Path.of("src/main/resources/openapi/metas.yaml"))
-                + Files.readString(Path.of("src/main/resources/openapi/recorrencias.yaml"));
+                + Files.readString(Path.of("src/main/resources/openapi/recorrencias.yaml"))
+                + Files.readString(Path.of("src/main/resources/openapi/ofx.yaml"));
         Set<String> ids = operationIds(contratos);
         List<String> nomes = new ArrayList<>();
         nomes.addAll(nomesPostman());

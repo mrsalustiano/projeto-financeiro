@@ -1,0 +1,24 @@
+meta {
+  name: importarOfx_422_outro_banco
+  type: http
+  seq: 15
+}
+
+post {
+  url: {{baseUrl}}/api/v1/ofx/importacoes?contaId={{idConta}}
+  body: multipart-form
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessUsuario}}
+}
+
+body:multipart-form {
+  arquivo: @file(../../../ofx/BB_1234567_01OUT2026_22OUT2026.ofx)
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(422);
+  expect(res.getBody().codigoErro).to.equal('OFX_CONTA_DIVERGENTE');
+}

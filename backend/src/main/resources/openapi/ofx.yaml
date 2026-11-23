@@ -1,0 +1,155 @@
+openapi: 3.0.3
+info:
+  title: FinControl OFX
+  version: 0.5.0
+paths:
+  /api/v1/ofx/sugestoes:
+    post:
+      operationId: sugerirContasOfx
+      tags: [ofx]
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [arquivo]
+              properties:
+                arquivo:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Contas do cliente que combinam com o arquivo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SugestaoOfxResponse'
+        '400':
+          description: Arquivo ausente
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '422':
+          description: Arquivo que não é OFX
+  /api/v1/ofx/importacoes:
+    post:
+      operationId: importarOfx
+      tags: [ofx]
+      security:
+        - bearer: []
+      parameters:
+        - name: contaId
+          in: query
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [arquivo]
+              properties:
+                arquivo:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Importação concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportacaoOfxResponse'
+        '400':
+          description: Arquivo ou conta ausente
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Conta não encontrada
+        '422':
+          description: Arquivo que não é OFX, OFX sem transação ou arquivo de outro banco
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ContaResumo:
+      type: object
+      required: [id, nome, banco, tipo]
+      properties:
+        id:
+          type: string
+        nome:
+          type: string
+        banco:
+          type: string
+        tipo:
+          type: string
+          enum: [CORRENTE, POUPANCA, CARTAO_CREDITO, BENEFICIO]
+    SugestaoOfxResponse:
+      type: object
+      required: [banco, movimentos, contas]
+      properties:
+        banco:
+          type: string
+          nullable: true
+        identificador:
+          type: string
+          nullable: true
+        moeda:
+          type: string
+          nullable: true
+        inicio:
+          type: string
+          format: date
+          nullable: true
+        fim:
+          type: string
+          format: date
+          nullable: true
+        movimentos:
+          type: integer
+        contas:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContaResumo'
+    ImportacaoOfxResponse:
+      type: object
+      required: [importados, duplicados, semCategoria, avisos, contaId]
+      properties:
+        importados:
+          type: integer
+        duplicados:
+          type: integer
+        semCategoria:
+          type: integer
+        avisos:
+          type: array
+          items:
+            type: string
+        saldoInformado:
+          type: string
+          nullable: true
+        moeda:
+          type: string
+          nullable: true
+        banco:
+          type: string
+          nullable: true
+        contaId:
+          type: string
+        identificadorConta:
+          type: string
+          nullable: true
+        rendimento:
+          type: string
+          nullable: true

@@ -5417,6 +5417,501 @@
           ]
         }
       ]
+    },
+    {
+      "name": "ofx",
+      "item": [
+        {
+          "name": "listarContas_200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/contas"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.environment.set('idConta', pm.response.json()[0].id); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "sugerirContasOfx_200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/ofx/sugestoes",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "arquivo",
+                  "type": "file",
+                  "src": "../ofx/NU_7224833363_01OUT2026_22OUT2026.ofx"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); const b = pm.response.json(); pm.expect(b.banco).to.eql('Nubank'); pm.expect(b.movimentos).to.eql(38); pm.expect(b.contas.length).to.be.at.least(1); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "sugerirContasOfx_400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/ofx/sugestoes",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "outro",
+                  "value": "texto",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "sugerirContasOfx_401",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/ofx/sugestoes",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "arquivo",
+                  "type": "file",
+                  "src": "../ofx/NU_7224833363_01OUT2026_22OUT2026.ofx"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "sugerirContasOfx_403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessMaster}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/ofx/sugestoes",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "arquivo",
+                  "type": "file",
+                  "src": "../ofx/NU_7224833363_01OUT2026_22OUT2026.ofx"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "sugerirContasOfx_422",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/ofx/sugestoes",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "arquivo",
+                  "type": "file",
+                  "src": "../ofx/extrato.csv"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().codigoErro).to.eql('OFX_INVALIDO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "importarOfx_201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/ofx/importacoes?contaId={{idConta}}",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "arquivo",
+                  "type": "file",
+                  "src": "../ofx/NU_7224833363_01OUT2026_22OUT2026.ofx"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => { pm.response.to.have.status(201); const b = pm.response.json(); pm.expect(b.importados).to.eql(38); pm.expect(b.duplicados).to.eql(0); pm.expect(b.identificadorConta).to.eql('7224833363'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "importarOfx_201_repetida",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/ofx/importacoes?contaId={{idConta}}",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "arquivo",
+                  "type": "file",
+                  "src": "../ofx/NU_7224833363_01OUT2026_22OUT2026.ofx"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => { pm.response.to.have.status(201); const b = pm.response.json(); pm.expect(b.importados).to.eql(0); pm.expect(b.duplicados).to.eql(38); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "importarOfx_400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/ofx/importacoes?contaId={{idConta}}",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "outro",
+                  "value": "texto",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "importarOfx_401",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/ofx/importacoes?contaId={{idConta}}",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "arquivo",
+                  "type": "file",
+                  "src": "../ofx/NU_7224833363_01OUT2026_22OUT2026.ofx"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "importarOfx_403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessLeitor}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/ofx/importacoes?contaId={{idConta}}",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "arquivo",
+                  "type": "file",
+                  "src": "../ofx/NU_7224833363_01OUT2026_22OUT2026.ofx"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "importarOfx_404",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/ofx/importacoes?contaId=999999",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "arquivo",
+                  "type": "file",
+                  "src": "../ofx/NU_7224833363_01OUT2026_22OUT2026.ofx"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "importarOfx_422_invalido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/ofx/importacoes?contaId={{idConta}}",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "arquivo",
+                  "type": "file",
+                  "src": "../ofx/extrato.csv"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().codigoErro).to.eql('OFX_INVALIDO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "importarOfx_422_sem_transacao",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/ofx/importacoes?contaId={{idConta}}",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "arquivo",
+                  "type": "file",
+                  "src": "../ofx/vazio.ofx"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().codigoErro).to.eql('OFX_SEM_TRANSACAO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "importarOfx_422_outro_banco",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/ofx/importacoes?contaId={{idConta}}",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "arquivo",
+                  "type": "file",
+                  "src": "../ofx/BB_1234567_01OUT2026_22OUT2026.ofx"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().codigoErro).to.eql('OFX_CONTA_DIVERGENTE'); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }

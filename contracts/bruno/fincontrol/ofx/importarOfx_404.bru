@@ -1,0 +1,23 @@
+meta {
+  name: importarOfx_404
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{baseUrl}}/api/v1/ofx/importacoes?contaId=999999
+  body: multipart-form
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessUsuario}}
+}
+
+body:multipart-form {
+  arquivo: @file(../../../ofx/NU_7224833363_01OUT2026_22OUT2026.ofx)
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(404);
+}

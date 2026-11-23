@@ -14,7 +14,23 @@ public record PessoaSeed(
         String emailDoCliente,
         List<ContaSeed> contas,
         List<LancamentoSeed> lancamentos,
-        List<RecorrenciaSeed> recorrencias) {
+        List<RecorrenciaSeed> recorrencias,
+        List<RegraClassificacaoSeed> regras) {
+
+    public PessoaSeed(
+            String nome,
+            String email,
+            String nomeCliente,
+            Papel papel,
+            boolean usuarioAtivo,
+            boolean clienteAtivo,
+            String emailDoCliente,
+            List<ContaSeed> contas,
+            List<LancamentoSeed> lancamentos,
+            List<RecorrenciaSeed> recorrencias) {
+        this(nome, email, nomeCliente, papel, usuarioAtivo, clienteAtivo, emailDoCliente, contas, lancamentos,
+                recorrencias, List.of());
+    }
 
     public PessoaSeed(
             String nome,
@@ -25,7 +41,8 @@ public record PessoaSeed(
             boolean clienteAtivo,
             String emailDoCliente,
             List<ContaSeed> contas) {
-        this(nome, email, nomeCliente, papel, usuarioAtivo, clienteAtivo, emailDoCliente, contas, List.of(), List.of());
+        this(nome, email, nomeCliente, papel, usuarioAtivo, clienteAtivo, emailDoCliente, contas, List.of(),
+                List.of(), List.of());
     }
 
     public PessoaSeed(
@@ -35,12 +52,14 @@ public record PessoaSeed(
             Papel papel,
             boolean usuarioAtivo,
             boolean clienteAtivo) {
-        this(nome, email, nomeCliente, papel, usuarioAtivo, clienteAtivo, null, List.of(), List.of(), List.of());
+        this(nome, email, nomeCliente, papel, usuarioAtivo, clienteAtivo, null, List.of(), List.of(), List.of(),
+                List.of());
     }
 
     public PessoaSeed {
         contas = contas == null ? List.of() : List.copyOf(contas);
         lancamentos = lancamentos == null ? List.of() : List.copyOf(lancamentos);
         recorrencias = recorrencias == null ? List.of() : List.copyOf(recorrencias);
+        regras = regras == null ? List.of() : List.copyOf(regras);
     }
 }

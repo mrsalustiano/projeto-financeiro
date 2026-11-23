@@ -22,6 +22,8 @@ public interface LancamentoRepositorio {
 
     List<Lancamento> listarPorParcela(long clienteId, long parcelaId);
 
+    boolean existeFitid(long clienteId, long contaId, String fitid);
+
     void atualizar(Lancamento lancamento);
 
     boolean excluir(long clienteId, long id);

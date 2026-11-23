@@ -202,6 +202,6 @@ public class LancamentosEscrita {
                 lancamento.natureza(), lancamento.tipoDespesa(), lancamento.valor(), lancamento.data(),
                 lancamento.descricao(), lancamento.parcelaId(), lancamento.grupoParcela(),
                 lancamento.numeroParcela(), lancamento.totalParcelas(), lancamento.estornadoEm(),
-                lancamento.estornoMotivo(), lancamento.estornadoPor());
+                lancamento.estornoMotivo(), lancamento.estornadoPor(), lancamento.fitid());
     }
 }

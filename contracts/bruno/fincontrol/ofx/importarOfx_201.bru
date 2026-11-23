@@ -1,0 +1,25 @@
+meta {
+  name: importarOfx_201
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/v1/ofx/importacoes?contaId={{idConta}}
+  body: multipart-form
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessUsuario}}
+}
+
+body:multipart-form {
+  arquivo: @file(../../../ofx/NU_7224833363_01OUT2026_22OUT2026.ofx)
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(201);
+  expect(res.getBody().importados).to.equal(38);
+  expect(res.getBody().duplicados).to.equal(0);
+}
