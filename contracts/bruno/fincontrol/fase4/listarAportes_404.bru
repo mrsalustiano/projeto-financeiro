@@ -1,0 +1,19 @@
+meta {
+  name: listarAportes_404
+  type: http
+  seq: 42
+}
+
+get {
+  url: {{baseUrl}}/api/v1/metas/999999/aportes
+  body: none
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessUsuario}}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(404);
+}

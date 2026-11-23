@@ -1,0 +1,25 @@
+meta {
+  name: criarMeta_422
+  type: http
+  seq: 34
+}
+
+post {
+  url: {{baseUrl}}/api/v1/metas
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  authorization: Bearer {{accessUsuario}}
+}
+
+body:json {
+{"nome":"{{nomeMeta}}","valorAlvo":"5000.00"}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(422);
+  expect(res.getBody().codigoErro).to.equal('NOME_EM_USO');
+}

@@ -1,0 +1,23 @@
+meta {
+  name: criarMeta_401
+  type: http
+  seq: 32
+}
+
+post {
+  url: {{baseUrl}}/api/v1/metas
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+{"nome":"Viagem {{$timestamp}}","valorAlvo":"5000.00","dataAlvo":"2027-12-31"}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(401);
+}

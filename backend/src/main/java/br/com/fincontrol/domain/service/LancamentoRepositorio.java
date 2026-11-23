@@ -1,5 +1,7 @@
 package br.com.fincontrol.domain.service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,4 +27,6 @@ public interface LancamentoRepositorio {
     boolean excluir(long clienteId, long id);
 
     Optional<SaldoConta> saldo(long clienteId, long contaId);
+
+    BigDecimal gastoPorCategoria(long clienteId, long categoriaId, LocalDate de, LocalDate ate);
 }

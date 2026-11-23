@@ -1,0 +1,19 @@
+meta {
+  name: excluirOrcamento_204
+  type: http
+  seq: 22
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/orcamentos/2026/11/{{idCategoria}}
+  body: none
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessUsuario}}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(204);
+}

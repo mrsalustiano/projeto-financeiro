@@ -1,0 +1,25 @@
+meta {
+  name: criarTransferencia_409
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{baseUrl}}/api/v1/transferencias
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  authorization: Bearer {{accessUsuario}}
+}
+
+body:json {
+{"contaOrigemId":"{{idConta}}","contaDestinoId":"{{idContaFlash}}","valor":"100.00","data":"2025-07-10"}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(409);
+  expect(res.getBody().codigoErro).to.equal('MES_FECHADO');
+}

@@ -1,0 +1,168 @@
+openapi: 3.0.3
+info:
+  title: FinControl Recorrências
+  version: 0.4.0
+paths:
+  /api/v1/recorrencias:
+    get:
+      operationId: listarRecorrencias
+      tags: [recorrencias]
+      security:
+        - bearer: []
+      responses:
+        '200':
+          description: Recorrências do cliente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RecorrenciaResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+    post:
+      operationId: criarRecorrencia
+      tags: [recorrencias]
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecorrenciaRequest'
+      responses:
+        '201':
+          description: Recorrência criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecorrenciaResponse'
+        '400':
+          description: Campo inválido
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Conta ou categoria inexistente
+        '422':
+          description: Descrição em uso
+  /api/v1/recorrencias/{id}/pausa:
+    post:
+      operationId: pausarRecorrencia
+      tags: [recorrencias]
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Recorrência pausada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecorrenciaResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Não encontrada
+        '422':
+          description: Já pausada
+  /api/v1/recorrencias/{id}/retomada:
+    post:
+      operationId: retomarRecorrencia
+      tags: [recorrencias]
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Recorrência retomada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecorrenciaResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Não encontrada
+        '422':
+          description: Já ativa
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    RecorrenciaRequest:
+      type: object
+      required: [contaId, categoriaId, natureza, valor, descricao, diaDoMes]
+      properties:
+        contaId:
+          type: string
+        categoriaId:
+          type: string
+        natureza:
+          type: string
+          enum: [RECEITA, DESPESA]
+        tipoDespesa:
+          type: string
+          nullable: true
+          enum: [FIXA, VARIAVEL]
+        valor:
+          type: string
+          pattern: "^[0-9]+(\\.[0-9]{1,2})?$"
+        descricao:
+          type: string
+          minLength: 1
+          maxLength: 255
+        diaDoMes:
+          type: integer
+          minimum: 0
+          maximum: 31
+          description: Zero significa o último dia do mês.
+    RecorrenciaResponse:
+      type: object
+      required: [id, contaId, categoriaId, natureza, valor, descricao, diaDoMes, ativa]
+      properties:
+        id:
+          type: string
+        contaId:
+          type: string
+        categoriaId:
+          type: string
+        natureza:
+          type: string
+          enum: [RECEITA, DESPESA]
+        tipoDespesa:
+          type: string
+          nullable: true
+          enum: [FIXA, VARIAVEL]
+        valor:
+          type: string
+        descricao:
+          type: string
+        diaDoMes:
+          type: integer
+        ativa:
+          type: boolean
+        pausadaEm:
+          type: string
+          format: date-time
+          nullable: true

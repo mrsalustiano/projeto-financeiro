@@ -1,0 +1,25 @@
+meta {
+  name: definirOrcamento_200
+  type: http
+  seq: 17
+}
+
+put {
+  url: {{baseUrl}}/api/v1/orcamentos/2026/11/{{idCategoria}}
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  authorization: Bearer {{accessUsuario}}
+}
+
+body:json {
+{"limite":"1000.00"}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(200);
+  expect(res.getBody().limite).to.equal('1000.00');
+}

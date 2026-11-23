@@ -1,0 +1,24 @@
+meta {
+  name: criarTransferencia_404
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/api/v1/transferencias
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  authorization: Bearer {{accessUsuario}}
+}
+
+body:json {
+{"contaOrigemId":"999999","contaDestinoId":"{{idContaFlash}}","valor":"100.00","data":"2026-11-10"}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(404);
+}

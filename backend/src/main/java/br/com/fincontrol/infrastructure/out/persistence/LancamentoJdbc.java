@@ -1,9 +1,11 @@
 package br.com.fincontrol.infrastructure.out.persistence;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -144,21 +146,46 @@ public class LancamentoJdbc implements LancamentoRepositorio {
         List<SaldoConta> lista = jdbc.query(
                 """
                 SELECT c.saldo_inicial,
-                       COALESCE(SUM(CASE WHEN l.natureza = 'RECEITA' AND l.estornado_em IS NULL
-                                         THEN l.valor ELSE 0 END), 0) AS creditos,
-                       COALESCE(SUM(CASE WHEN l.natureza = 'DESPESA' AND l.estornado_em IS NULL
-                                         THEN l.valor ELSE 0 END), 0) AS debitos
+                       COALESCE((SELECT SUM(l.valor) FROM lancamento l
+                                 WHERE l.cliente_id = c.cliente_id AND l.conta_id = c.id
+                                   AND l.natureza = 'RECEITA' AND l.estornado_em IS NULL), 0) AS creditos,
+                       COALESCE((SELECT SUM(l.valor) FROM lancamento l
+                                 WHERE l.cliente_id = c.cliente_id AND l.conta_id = c.id
+                                   AND l.natureza = 'DESPESA' AND l.estornado_em IS NULL), 0) AS debitos,
+                       COALESCE((SELECT SUM(t.valor) FROM transferencia t
+                                 WHERE t.cliente_id = c.cliente_id AND t.conta_destino_id = c.id), 0) AS entradas,
+                       COALESCE((SELECT SUM(t.valor) FROM transferencia t
+                                 WHERE t.cliente_id = c.cliente_id AND t.conta_origem_id = c.id), 0) AS saidas
                 FROM conta c
-                LEFT JOIN lancamento l ON l.cliente_id = c.cliente_id AND l.conta_id = c.id
                 WHERE c.cliente_id = :clienteId AND c.id = :contaId
-                GROUP BY c.id, c.saldo_inicial
                 """,
                 Map.of("clienteId", clienteId, "contaId", contaId),
                 (rs, n) -> new SaldoConta(
                         rs.getBigDecimal("saldo_inicial"),
                         rs.getBigDecimal("creditos"),
-                        rs.getBigDecimal("debitos")));
+                        rs.getBigDecimal("debitos"),
+                        rs.getBigDecimal("entradas"),
+                        rs.getBigDecimal("saidas")));
         return lista.stream().findFirst();
+    }
+
+    @Override
+    public BigDecimal gastoPorCategoria(long clienteId, long categoriaId, LocalDate de, LocalDate ate) {
+        BigDecimal total = jdbc.queryForObject(
+                """
+                SELECT COALESCE(SUM(valor), 0)
+                FROM lancamento
+                WHERE cliente_id = :clienteId AND categoria_id = :categoriaId
+                  AND natureza = 'DESPESA' AND estornado_em IS NULL
+                  AND data BETWEEN :de AND :ate
+                """,
+                new MapSqlParameterSource()
+                        .addValue("clienteId", clienteId)
+                        .addValue("categoriaId", categoriaId)
+                        .addValue("de", java.sql.Date.valueOf(de))
+                        .addValue("ate", java.sql.Date.valueOf(ate)),
+                BigDecimal.class);
+        return total == null ? BigDecimal.ZERO : total;
     }
 
     private static MapSqlParameterSource parametros(Lancamento lancamento) {

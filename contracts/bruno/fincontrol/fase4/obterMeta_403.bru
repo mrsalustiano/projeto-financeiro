@@ -1,0 +1,19 @@
+meta {
+  name: obterMeta_403
+  type: http
+  seq: 37
+}
+
+get {
+  url: {{baseUrl}}/api/v1/metas/{{idMeta}}
+  body: none
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessMaster}}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(403);
+}

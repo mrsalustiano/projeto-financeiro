@@ -1,0 +1,19 @@
+meta {
+  name: listarRecorrencias_403
+  type: http
+  seq: 50
+}
+
+get {
+  url: {{baseUrl}}/api/v1/recorrencias
+  body: none
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessMaster}}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(403);
+}

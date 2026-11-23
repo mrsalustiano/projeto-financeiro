@@ -1,0 +1,24 @@
+meta {
+  name: criarMeta_403
+  type: http
+  seq: 33
+}
+
+post {
+  url: {{baseUrl}}/api/v1/metas
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  authorization: Bearer {{accessLeitor}}
+}
+
+body:json {
+{"nome":"Viagem {{$timestamp}}","valorAlvo":"5000.00","dataAlvo":"2027-12-31"}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(403);
+}

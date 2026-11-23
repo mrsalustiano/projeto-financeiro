@@ -1,0 +1,15 @@
+meta {
+  name: obterMeta_401
+  type: http
+  seq: 36
+}
+
+get {
+  url: {{baseUrl}}/api/v1/metas/{{idMeta}}
+  body: none
+  auth: none
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(401);
+}

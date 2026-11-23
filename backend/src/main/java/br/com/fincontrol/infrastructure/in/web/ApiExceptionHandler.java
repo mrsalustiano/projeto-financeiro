@@ -20,6 +20,8 @@ import br.com.fincontrol.domain.service.NaoAutenticadoException;
 import br.com.fincontrol.domain.service.NaoEncontradoException;
 import br.com.fincontrol.domain.service.NomeEmUsoException;
 import br.com.fincontrol.domain.service.ParcelaInvalidaException;
+import br.com.fincontrol.domain.service.RecorrenciaInativaException;
+import br.com.fincontrol.domain.service.TransferenciaInvalidaException;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestControllerAdvice
@@ -113,6 +115,26 @@ public class ApiExceptionHandler {
                 "Número de parcelas inválido para o valor informado.",
                 req,
                 ErroCodigo.PARCELA_INVALIDA);
+    }
+
+    @ExceptionHandler(TransferenciaInvalidaException.class)
+    ProblemDetail transferenciaInvalida(HttpServletRequest req) {
+        return Problemas.de(
+                HttpStatus.valueOf(422),
+                "Transferência inválida",
+                "Conta de origem e destino devem ser diferentes.",
+                req,
+                ErroCodigo.TRANSFERENCIA_INVALIDA);
+    }
+
+    @ExceptionHandler(RecorrenciaInativaException.class)
+    ProblemDetail recorrenciaInativa(HttpServletRequest req) {
+        return Problemas.de(
+                HttpStatus.valueOf(422),
+                "Recorrência inativa",
+                "Recorrência já está no estado pedido.",
+                req,
+                ErroCodigo.RECORRENCIA_INATIVA);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

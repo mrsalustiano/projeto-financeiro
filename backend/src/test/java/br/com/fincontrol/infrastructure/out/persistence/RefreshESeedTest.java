@@ -27,6 +27,8 @@ import org.springframework.mock.env.MockEnvironment;
 
 import br.com.fincontrol.application.GarantirCategoriasPadrao;
 import br.com.fincontrol.application.GarantirContas;
+import br.com.fincontrol.application.GarantirLancamentos;
+import br.com.fincontrol.application.GarantirRecorrencias;
 import br.com.fincontrol.application.PessoaSeed;
 import br.com.fincontrol.application.SeedConfig;
 import br.com.fincontrol.domain.model.Papel;
@@ -46,6 +48,8 @@ class RefreshESeedTest {
     @Mock private SenhaPort senhas;
     @Mock private GarantirCategoriasPadrao categorias;
     @Mock private GarantirContas contas;
+    @Mock private GarantirLancamentos lancamentos;
+    @Mock private GarantirRecorrencias recorrencias;
 
     @Test
     void refreshERevogacao() throws Exception {
@@ -80,7 +84,7 @@ class RefreshESeedTest {
     @Test
     void seedPulaSemSenhaEQuemJaExiste() {
         SeedConfig vazio = new SeedConfig(" ", List.of());
-        new SeedInicial(clientes, usuarios, senhas, vazio, categorias, contas).run(null);
+        new SeedInicial(clientes, usuarios, senhas, vazio, categorias, contas, lancamentos, recorrencias).run(null);
         verify(senhas, never()).hash(anyString());
 
         PessoaSeed master = new PessoaSeed("Master", " Master@Fincontrol.local ", "", Papel.MASTER, true, true);
@@ -90,7 +94,7 @@ class RefreshESeedTest {
         when(usuarios.emailExiste("voce@fincontrol.local")).thenReturn(false);
         when(clientes.inserir("Casa", true)).thenReturn(42L);
 
-        new SeedInicial(clientes, usuarios, senhas, new SeedConfig("segredo", List.of(master, casa)), categorias, contas).run(null);
+        new SeedInicial(clientes, usuarios, senhas, new SeedConfig("segredo", List.of(master, casa)), categorias, contas, lancamentos, recorrencias).run(null);
 
         verify(clientes, never()).inserir("", true);
         verify(usuarios).inserir(org.mockito.ArgumentMatchers.argThat(novo -> novo.clienteId() != null && novo.clienteId() == 42L));
@@ -106,7 +110,7 @@ class RefreshESeedTest {
         when(usuarios.buscarPorEmail("voce@fincontrol.local")).thenReturn(Optional.of(
                 new Usuario(7L, 42L, "Voce", "voce@fincontrol.local", "hash", Papel.ADMIN, true, 0, null)));
 
-        new SeedInicial(clientes, usuarios, senhas, new SeedConfig("segredo", List.of(leitor)), categorias, contas).run(null);
+        new SeedInicial(clientes, usuarios, senhas, new SeedConfig("segredo", List.of(leitor)), categorias, contas, lancamentos, recorrencias).run(null);
 
         verify(clientes, never()).inserir(anyString(), org.mockito.ArgumentMatchers.anyBoolean());
         verify(usuarios).inserir(org.mockito.ArgumentMatchers.argThat(novo -> novo.clienteId() == 42L && novo.papel() == Papel.LEITOR));
@@ -122,7 +126,7 @@ class RefreshESeedTest {
                 Optional.empty(),
                 Optional.of(new Usuario(7L, 42L, "Voce", "voce@fincontrol.local", "hash", Papel.ADMIN, true, 0, null)));
 
-        SeedInicial seed = new SeedInicial(clientes, usuarios, senhas, new SeedConfig("segredo", List.of(casa)), categorias, contas);
+        SeedInicial seed = new SeedInicial(clientes, usuarios, senhas, new SeedConfig("segredo", List.of(casa)), categorias, contas, lancamentos, recorrencias);
         seed.run(null);
         seed.run(null);
 
