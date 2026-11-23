@@ -33,6 +33,8 @@ springdoc:
         url: /contratos/ofx.yaml
       - name: conciliacao
         url: /contratos/conciliacao.yaml
+      - name: auditoria
+        url: /contratos/auditoria.yaml
       - name: transferencias
         url: /contratos/transferencias.yaml
       - name: orcamentos

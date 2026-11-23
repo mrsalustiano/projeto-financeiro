@@ -79,7 +79,8 @@ class ContratoColecaoTest {
                 + Files.readString(Path.of("src/main/resources/openapi/metas.yaml"))
                 + Files.readString(Path.of("src/main/resources/openapi/recorrencias.yaml"))
                 + Files.readString(Path.of("src/main/resources/openapi/ofx.yaml"))
-                + Files.readString(Path.of("src/main/resources/openapi/conciliacao.yaml"));
+                + Files.readString(Path.of("src/main/resources/openapi/conciliacao.yaml"))
+                + Files.readString(Path.of("src/main/resources/openapi/auditoria.yaml"));
         Set<String> ids = operationIds(contratos);
         List<String> nomes = new ArrayList<>();
         nomes.addAll(nomesPostman());
