@@ -24,6 +24,6 @@ public class ConfiguracaoIa {
     }
 
     private static String nomeDoModelo(Environment ambiente, String provedor) {
-        return ambiente.getProperty("spring.ai." + provedor + ".chat.options.model", provedor);
+        return ambiente.getProperty("spring.ai." + provedor + ".chat.model", provedor);
     }
 }
