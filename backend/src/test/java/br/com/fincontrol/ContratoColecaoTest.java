@@ -24,6 +24,7 @@ class ContratoColecaoTest {
             entry("me", Set.of("200", "401")),
             entry("criarCliente", Set.of("201", "400", "401", "403")),
             entry("listarAuditoria", Set.of("200", "400", "401", "403")),
+            entry("analisarFinancas", Set.of("200", "400", "401", "403", "422", "503")),
             entry("listarCategorias", Set.of("200", "401", "403")),
             entry("criarCategoria", Set.of("201", "400", "401", "403", "422")),
             entry("atualizarCategoria", Set.of("200", "400", "401", "403", "404", "422")),
@@ -80,7 +81,8 @@ class ContratoColecaoTest {
                 + Files.readString(Path.of("src/main/resources/openapi/recorrencias.yaml"))
                 + Files.readString(Path.of("src/main/resources/openapi/ofx.yaml"))
                 + Files.readString(Path.of("src/main/resources/openapi/conciliacao.yaml"))
-                + Files.readString(Path.of("src/main/resources/openapi/auditoria.yaml"));
+                + Files.readString(Path.of("src/main/resources/openapi/auditoria.yaml"))
+                + Files.readString(Path.of("src/main/resources/openapi/analise.yaml"));
         Set<String> ids = operationIds(contratos);
         List<String> nomes = new ArrayList<>();
         nomes.addAll(nomesPostman());

@@ -1,0 +1,24 @@
+meta {
+  name: analisarFinancas_422
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/v1/analise
+  body: json
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessUsuario}}
+  content-type: application/json
+}
+
+body:json {
+  {"mes":"2026-11","tipo":"PRESUNTIVA","pergunta":"onde posso cortar gastos?"}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(422);
+}

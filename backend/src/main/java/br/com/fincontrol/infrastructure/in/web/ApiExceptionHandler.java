@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -20,6 +21,9 @@ import br.com.fincontrol.domain.service.ConciliacaoRepetidaException;
 import br.com.fincontrol.domain.service.EmailEmUsoException;
 import br.com.fincontrol.domain.service.EstornoRepetidoException;
 import br.com.fincontrol.domain.service.IdempotenciaConflitoException;
+import br.com.fincontrol.domain.service.IaDesabilitadaException;
+import br.com.fincontrol.domain.service.IaIndisponivelException;
+import br.com.fincontrol.domain.service.IaRespostaInvalidaException;
 import br.com.fincontrol.domain.service.LancamentoEstornadoException;
 import br.com.fincontrol.domain.service.LimiteInvalidoException;
 import br.com.fincontrol.domain.service.LoginBloqueadoException;
@@ -216,6 +220,41 @@ public class ApiExceptionHandler {
                 "Envie um comprovante PNG, JPEG ou PDF.",
                 req,
                 ErroCodigo.COMPROVANTE_TIPO_INVALIDO);
+    }
+
+    @ExceptionHandler(IaDesabilitadaException.class)
+    ProblemDetail iaDesabilitada(HttpServletRequest req) {
+        return Problemas.de(
+                HttpStatus.SERVICE_UNAVAILABLE,
+                "Análise desabilitada",
+                "Análise por IA desabilitada.",
+                req,
+                ErroCodigo.IA_DESABILITADA);
+    }
+
+    @ExceptionHandler(IaIndisponivelException.class)
+    ProblemDetail iaIndisponivel(HttpServletRequest req) {
+        return Problemas.de(
+                HttpStatus.SERVICE_UNAVAILABLE,
+                "Provedor indisponível",
+                "Provedor de IA indisponível.",
+                req,
+                ErroCodigo.IA_INDISPONIVEL);
+    }
+
+    @ExceptionHandler(IaRespostaInvalidaException.class)
+    ProblemDetail iaRespostaInvalida(HttpServletRequest req) {
+        return Problemas.de(
+                HttpStatus.valueOf(422),
+                "Resposta inválida",
+                "O provedor respondeu fora do schema esperado.",
+                req,
+                ErroCodigo.IA_RESPOSTA_INVALIDA);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    ProblemDetail corpoIlegivel(HttpServletRequest req) {
+        return Problemas.de(HttpStatus.BAD_REQUEST, "Dados inválidos", "Revise os campos informados.", req, ErroCodigo.VALIDACAO);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
