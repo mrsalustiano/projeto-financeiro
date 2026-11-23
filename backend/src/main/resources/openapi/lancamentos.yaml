@@ -1,0 +1,412 @@
+openapi: 3.0.3
+info:
+  title: FinControl Lançamentos
+  version: 0.3.0
+paths:
+  /api/v1/lancamentos:
+    get:
+      operationId: listarLancamentos
+      tags: [lancamentos]
+      security:
+        - bearer: []
+      parameters:
+        - name: contaId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: de
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: ate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Lançamentos do cliente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LancamentoResponse'
+        '400':
+          description: Filtro inválido
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+    post:
+      operationId: criarLancamento
+      tags: [lancamentos]
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LancamentoRequest'
+      responses:
+        '201':
+          description: Lançamento criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LancamentoCriadoResponse'
+        '400':
+          description: Campo inválido
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Conta ou categoria inexistente
+        '409':
+          description: Mês fechado ou chave de idempotência com outro corpo
+        '422':
+          description: Regra de negócio violada
+  /api/v1/lancamentos/{id}:
+    get:
+      operationId: obterLancamento
+      tags: [lancamentos]
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Lançamento do cliente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LancamentoResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Não encontrado
+    put:
+      operationId: atualizarLancamento
+      tags: [lancamentos]
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LancamentoRequest'
+      responses:
+        '200':
+          description: Lançamento atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LancamentoResponse'
+        '400':
+          description: Campo inválido
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Não encontrado
+        '409':
+          description: Mês fechado
+        '422':
+          description: Lançamento estornado
+    delete:
+      operationId: excluirLancamento
+      tags: [lancamentos]
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '204':
+          description: Lançamento excluído
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Não encontrado
+        '409':
+          description: Mês fechado
+        '422':
+          description: Lançamento estornado
+  /api/v1/lancamentos/{id}/estorno:
+    post:
+      operationId: estornarLancamento
+      tags: [lancamentos]
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EstornoRequest'
+      responses:
+        '200':
+          description: Lançamento estornado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LancamentoResponse'
+        '400':
+          description: Motivo ausente
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Não encontrado
+        '409':
+          description: Mês fechado
+        '422':
+          description: Estorno repetido
+  /api/v1/contas/{id}/saldo:
+    get:
+      operationId: obterSaldoConta
+      tags: [lancamentos]
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Saldo da conta sem estornados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaldoContaResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Conta não encontrada
+  /api/v1/meses:
+    get:
+      operationId: listarMeses
+      tags: [meses]
+      security:
+        - bearer: []
+      responses:
+        '200':
+          description: Meses fechados do cliente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FechamentoMesResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+  /api/v1/meses/{ano}/{mes}/fechamento:
+    post:
+      operationId: fecharMes
+      tags: [meses]
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/Ano'
+        - $ref: '#/components/parameters/Mes'
+      responses:
+        '200':
+          description: Mês fechado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FechamentoMesResponse'
+        '400':
+          description: Ano ou mês inválido
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+    delete:
+      operationId: reabrirMes
+      tags: [meses]
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/Ano'
+        - $ref: '#/components/parameters/Mes'
+      responses:
+        '204':
+          description: Mês reaberto
+        '400':
+          description: Ano ou mês inválido
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Mês não estava fechado
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    Ano:
+      name: ano
+      in: path
+      required: true
+      schema:
+        type: string
+    Mes:
+      name: mes
+      in: path
+      required: true
+      schema:
+        type: string
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      schema:
+        type: string
+        maxLength: 120
+  schemas:
+    LancamentoRequest:
+      type: object
+      required: [contaId, categoriaId, natureza, valor, data, descricao]
+      properties:
+        contaId:
+          type: string
+        categoriaId:
+          type: string
+        natureza:
+          type: string
+          enum: [RECEITA, DESPESA]
+        tipoDespesa:
+          type: string
+          nullable: true
+          enum: [FIXA, VARIAVEL]
+        valor:
+          type: string
+          pattern: "^[0-9]+(\\.[0-9]{1,2})?$"
+        data:
+          type: string
+          format: date
+        descricao:
+          type: string
+          minLength: 1
+          maxLength: 255
+        parcelas:
+          type: integer
+          default: 1
+    EstornoRequest:
+      type: object
+      required: [motivo]
+      properties:
+        motivo:
+          type: string
+          minLength: 1
+          maxLength: 255
+    LancamentoResponse:
+      type: object
+      required: [id, contaId, categoriaId, natureza, valor, data, descricao, estornado]
+      properties:
+        id:
+          type: string
+        contaId:
+          type: string
+        categoriaId:
+          type: string
+        natureza:
+          type: string
+          enum: [RECEITA, DESPESA]
+        tipoDespesa:
+          type: string
+          nullable: true
+          enum: [FIXA, VARIAVEL]
+        valor:
+          type: string
+        data:
+          type: string
+          format: date
+        descricao:
+          type: string
+        grupoParcela:
+          type: string
+          nullable: true
+        numeroParcela:
+          type: integer
+          nullable: true
+        totalParcelas:
+          type: integer
+          nullable: true
+        estornado:
+          type: boolean
+        estornoMotivo:
+          type: string
+          nullable: true
+        estornadoEm:
+          type: string
+          format: date-time
+          nullable: true
+    LancamentoCriadoResponse:
+      type: object
+      required: [parcelas]
+      properties:
+        grupoParcela:
+          type: string
+          nullable: true
+        parcelas:
+          type: array
+          items:
+            $ref: '#/components/schemas/LancamentoResponse'
+    SaldoContaResponse:
+      type: object
+      required: [contaId, saldoInicial, creditos, debitos, saldo]
+      properties:
+        contaId:
+          type: string
+        saldoInicial:
+          type: string
+        creditos:
+          type: string
+        debitos:
+          type: string
+        saldo:
+          type: string
+    FechamentoMesResponse:
+      type: object
+      required: [ano, mes, fechadoEm, fechadoPor]
+      properties:
+        ano:
+          type: integer
+        mes:
+          type: integer
+        fechadoEm:
+          type: string
+          format: date-time
+        fechadoPor:
+          type: string

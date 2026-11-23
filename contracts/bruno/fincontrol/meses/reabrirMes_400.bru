@@ -1,0 +1,19 @@
+meta {
+  name: reabrirMes_400
+  type: http
+  seq: 9
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/meses/2026/13/fechamento
+  body: none
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessUsuario}}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(400);
+}

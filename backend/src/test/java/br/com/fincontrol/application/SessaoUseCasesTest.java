@@ -90,19 +90,22 @@ class SessaoUseCasesTest {
     }
 
     @Test
-    void logoutRevogaRefreshEJti() {
+    void logoutRevogaRefreshDoJtiEJti() {
         Acesso acesso = new Acesso("7", Papel.ADMIN, 42L, "jti", AGORA);
-        when(refresh.hash("opaco")).thenReturn("hash");
-        when(refreshRepositorio.buscarPorHash("hash"))
-                .thenReturn(Optional.of(new RefreshGuardado(4L, 7L, AGORA, false, "jti", AGORA)));
-        EncerrarSessao caso = new EncerrarSessao(refreshRepositorio, refresh, revogacao);
+        EncerrarSessao caso = new EncerrarSessao(refreshRepositorio, revogacao);
 
-        caso.executar(acesso, "opaco");
-        caso.executar(acesso, " ");
+        caso.executar(acesso);
 
-        verify(refreshRepositorio).revogar(4L);
-        verify(revogacao, org.mockito.Mockito.times(2)).revogar("jti", AGORA);
-        assertThatThrownBy(() -> caso.executar(null, "opaco")).isInstanceOf(NaoAutenticadoException.class);
+        verify(refreshRepositorio).revogarPorJtiAccess("jti");
+        verify(revogacao).revogar("jti", AGORA);
+    }
+
+    @Test
+    void logoutSemAcessoRecusa() {
+        EncerrarSessao caso = new EncerrarSessao(refreshRepositorio, revogacao);
+
+        assertThatThrownBy(() -> caso.executar(null)).isInstanceOf(NaoAutenticadoException.class);
+        verifyNoInteractions(refreshRepositorio, revogacao);
     }
 
     @Test

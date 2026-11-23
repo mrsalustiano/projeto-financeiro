@@ -1,0 +1,19 @@
+meta {
+  name: listarMeses_403
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/meses
+  body: none
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessMaster}}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(403);
+}

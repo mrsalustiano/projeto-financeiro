@@ -31,9 +31,8 @@ paths:
     post:
       operationId: logout
       tags: [auth]
-      security: []
-      parameters:
-        - $ref: '#/components/parameters/RefreshCookie'
+      security:
+        - bearer: []
       responses:
         '204':
           description: Sessão encerrada
@@ -45,6 +44,7 @@ paths:
       tags: [auth]
       security: []
       parameters:
+        - $ref: '#/components/parameters/RefreshHeader'
         - $ref: '#/components/parameters/RefreshCookie'
       responses:
         '200':
@@ -59,7 +59,8 @@ paths:
     get:
       operationId: me
       tags: [auth]
-      security: []
+      security:
+        - bearer: []
       responses:
         '200':
           description: Usuário do token
@@ -70,11 +71,25 @@ paths:
         '401':
           description: Não autenticado
 components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Cole aqui o accessToken devolvido pelo login ou pelo refresh.
   parameters:
+    RefreshHeader:
+      name: X-Refresh-Token
+      in: header
+      required: false
+      description: Refresh opaco devolvido no campo refreshToken. Tem precedência sobre o cookie.
+      schema:
+        type: string
     RefreshCookie:
       name: refresh_token
       in: cookie
       required: false
+      description: Alternativa ao header X-Refresh-Token.
       schema:
         type: string
   schemas:
@@ -90,7 +105,7 @@ components:
           minLength: 1
     TokenResponse:
       type: object
-      required: [accessToken, tokenType, expiresIn]
+      required: [accessToken, tokenType, expiresIn, refreshToken]
       properties:
         accessToken:
           type: string
@@ -99,6 +114,9 @@ components:
         expiresIn:
           type: integer
           format: int32
+        refreshToken:
+          type: string
+          description: Mesmo valor do cookie refresh_token. O cookie continua sendo enviado.
     UsuarioResponse:
       type: object
       required: [id, nome, email, role]

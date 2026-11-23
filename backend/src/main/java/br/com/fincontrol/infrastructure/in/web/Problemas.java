@@ -28,7 +28,7 @@ public final class Problemas {
 
     public static void escrever(HttpServletResponse response, ProblemDetail problema) throws IOException {
         response.setStatus(problema.getStatus());
-        response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
+        response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE + ";charset=UTF-8");
         response.getWriter().write(json(problema));
     }
 

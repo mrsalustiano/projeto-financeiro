@@ -1,0 +1,19 @@
+meta {
+  name: obterLancamento_403
+  type: http
+  seq: 17
+}
+
+get {
+  url: {{baseUrl}}/api/v1/lancamentos/{{idLancamento}}
+  body: none
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessMaster}}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(403);
+}

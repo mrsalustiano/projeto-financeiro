@@ -7,29 +7,3667 @@
     {
       "name": "auth",
       "item": [
-        {"name": "login_400", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{}"}, "url": "{{baseUrl}}/api/v1/auth/login"}, "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('400', () => { pm.response.to.have.status(400); const b = pm.response.json(); pm.expect(b.codigoErro).to.eql('VALIDACAO'); pm.expect(b.erros.length).to.be.above(0); pm.expect(b.erros[0]).to.have.property('campo'); pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json'); });"]}}]},
-        {"name": "login_401_inexistente", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"email\":\"nao-existe@fincontrol.local\",\"senha\":\"{{senha}}\"}"}, "url": "{{baseUrl}}/api/v1/auth/login"}, "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('401', () => { pm.response.to.have.status(401); const b = pm.response.json(); pm.expect(b.codigoErro).to.eql('NAO_AUTENTICADO'); pm.expect(b.detail).to.eql('Não autenticado.'); pm.expect(b.detail).to.not.include('Exception'); });"]}}]},
-        {"name": "login_401_inativo", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"email\":\"{{emailInativo}}\",\"senha\":\"{{senha}}\"}"}, "url": "{{baseUrl}}/api/v1/auth/login"}, "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('401', () => { pm.response.to.have.status(401); pm.expect(pm.response.json().codigoErro).to.eql('NAO_AUTENTICADO'); pm.expect(pm.response.json().detail).to.eql('Não autenticado.'); });"]}}]},
-        {"name": "login_401_cliente_inativo", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"email\":\"{{emailClienteInativo}}\",\"senha\":\"{{senha}}\"}"}, "url": "{{baseUrl}}/api/v1/auth/login"}, "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('401', () => { pm.response.to.have.status(401); pm.expect(pm.response.json().detail).to.eql('Não autenticado.'); });"]}}]},
-        {"name": "login_401_senha", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"email\":\"{{emailUsuario}}\",\"senha\":\"senha-errada\"}"}, "url": "{{baseUrl}}/api/v1/auth/login"}, "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('401', () => { pm.response.to.have.status(401); pm.expect(pm.response.json().detail).to.eql('Não autenticado.'); });"]}}]},
-        {"name": "login_200_master", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"email\":\"{{emailMaster}}\",\"senha\":\"{{senha}}\"}"}, "url": "{{baseUrl}}/api/v1/auth/login"}, "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["const b = pm.response.json(); const p = JSON.parse(atob(b.accessToken.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); pm.test('200', () => { pm.response.to.have.status(200); pm.expect(p.iss).to.eql('fincontrol'); pm.expect(p.role).to.eql('MASTER'); pm.expect(p.clienteId).to.be.undefined; pm.expect(p.jti).to.match(/^[0-9a-f-]{36}$/i); pm.expect(p.nbf).to.eql(p.iat); pm.expect(p.exp - p.iat).to.eql(900); pm.expect(Object.keys(p).sort()).to.eql(['exp','iat','iss','jti','nbf','role','sub']); pm.expect(Object.keys(b).sort()).to.eql(['accessToken','expiresIn','tokenType']); pm.environment.set('accessMaster', b.accessToken); pm.environment.set('subMaster', p.sub); });"]}}]},
-        {"name": "me_200_master", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{accessMaster}}"}], "url": "{{baseUrl}}/api/v1/auth/me"}, "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('200', () => { pm.response.to.have.status(200); const b = pm.response.json(); pm.expect(b.role).to.eql('MASTER'); pm.expect(b.clienteId).to.eql(null); pm.expect(b.id).to.eql(pm.environment.get('subMaster')); pm.expect(b).to.not.have.property('senha'); });"]}}]},
-        {"name": "login_200", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"email\":\"{{emailUsuario}}\",\"senha\":\"{{senha}}\"}"}, "url": "{{baseUrl}}/api/v1/auth/login"}, "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["const b = pm.response.json(); const p = JSON.parse(atob(b.accessToken.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); const cookie = pm.response.headers.get('Set-Cookie'); pm.test('200', () => { pm.response.to.have.status(200); pm.expect(p.role).to.eql('ADMIN'); pm.expect(p.clienteId).to.be.a('string'); pm.expect(p.iss).to.eql('fincontrol'); pm.expect(p.exp - p.iat).to.eql(900); pm.expect(cookie).to.include('HttpOnly'); pm.expect(cookie).to.include('SameSite=Strict'); pm.expect(cookie).to.include('Path=/api/v1/auth'); pm.environment.set('accessUsuario', b.accessToken); pm.environment.set('subUsuario', p.sub); pm.environment.set('clienteUsuario', p.clienteId); pm.environment.set('refreshUsuario', cookie.split(';')[0].substring('refresh_token='.length)); });"]}}]},
-        {"name": "me_200", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{accessUsuario}}"}], "url": "{{baseUrl}}/api/v1/auth/me"}, "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('200', () => { pm.response.to.have.status(200); const b = pm.response.json(); pm.expect(b.id).to.eql(pm.environment.get('subUsuario')); pm.expect(b.role).to.eql('ADMIN'); pm.expect(b.clienteId).to.eql(pm.environment.get('clienteUsuario')); pm.expect(b.email).to.eql(pm.environment.get('emailUsuario')); });"]}}]},
-        {"name": "login_200_mae", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"email\":\"{{emailMae}}\",\"senha\":\"{{senha}}\"}"}, "url": "{{baseUrl}}/api/v1/auth/login"}, "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["const p = JSON.parse(atob(pm.response.json().accessToken.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); pm.test('200', () => { pm.response.to.have.status(200); pm.expect(p.role).to.eql('ADMIN'); pm.expect(p.clienteId).to.not.eql(pm.environment.get('clienteUsuario')); });"]}}]},
-        {"name": "criarCliente_401", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"nomeCliente\":\"X\",\"nomeAdministrador\":\"Y\",\"emailAdministrador\":\"y@fincontrol.local\",\"senhaAdministrador\":\"segredo123\"}"}, "url": "{{baseUrl}}/api/v1/master/clientes"}, "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('401', () => { pm.response.to.have.status(401); pm.expect(pm.response.json().codigoErro).to.eql('NAO_AUTENTICADO'); });"]}}]},
-        {"name": "criarCliente_403", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{accessUsuario}}"}], "body": {"mode": "raw", "raw": "{\"nomeCliente\":\"X\",\"nomeAdministrador\":\"Y\",\"emailAdministrador\":\"y@fincontrol.local\",\"senhaAdministrador\":\"segredo123\"}"}, "url": "{{baseUrl}}/api/v1/master/clientes"}, "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('403', () => { pm.response.to.have.status(403); pm.expect(pm.response.json().codigoErro).to.eql('ACESSO_NEGADO'); });"]}}]},
-        {"name": "criarCliente_400", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{accessMaster}}"}], "body": {"mode": "raw", "raw": "{\"nomeCliente\":\"\",\"nomeAdministrador\":\"Y\",\"emailAdministrador\":\"nao-email\",\"senhaAdministrador\":\"curta\"}"}, "url": "{{baseUrl}}/api/v1/master/clientes"}, "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('400', () => { pm.response.to.have.status(400); pm.expect(pm.response.json().codigoErro).to.eql('VALIDACAO'); pm.expect(pm.response.json().erros.length).to.be.above(0); });"]}}]},
-        {"name": "criarCliente_201", "event": [{"listen": "prerequest", "script": {"type": "text/javascript", "exec": ["pm.environment.set('emailNovo', 'novo-' + Date.now() + '@fincontrol.local');"]}}, {"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('201', () => { pm.response.to.have.status(201); const b = pm.response.json(); pm.expect(b.clienteId).to.be.a('string'); pm.expect(b.administradorId).to.be.a('string'); pm.expect(b).to.not.have.property('senha'); });"]}}], "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{accessMaster}}"}], "body": {"mode": "raw", "raw": "{\"nomeCliente\":\"Novo\",\"nomeAdministrador\":\"Novo Admin\",\"emailAdministrador\":\"{{emailNovo}}\",\"senhaAdministrador\":\"{{senha}}\"}"}, "url": "{{baseUrl}}/api/v1/master/clientes"}},
-        {"name": "login_429", "event": [{"listen": "prerequest", "script": {"type": "text/javascript", "exec": ["function falhar(n){ if(n===0){return;} pm.sendRequest({url: pm.environment.get('baseUrl')+'/api/v1/auth/login', method:'POST', header:{'Content-Type':'application/json'}, body:{mode:'raw', raw: JSON.stringify({email: pm.environment.get('emailNovo'), senha:'errada-demais'})}}, function(){ falhar(n-1); }); } falhar(4);"]}}, {"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('429', () => { pm.response.to.have.status(429); pm.expect(pm.response.json().codigoErro).to.eql('LOGIN_BLOQUEADO'); });"]}}], "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"email\":\"{{emailNovo}}\",\"senha\":\"errada-demais\"}"}, "url": "{{baseUrl}}/api/v1/auth/login"}},
-        {"name": "refreshToken_200", "request": {"method": "POST", "header": [{"key": "Cookie", "value": "refresh_token={{refreshUsuario}}"}], "url": "{{baseUrl}}/api/v1/auth/refresh_token"}, "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["const b = pm.response.json(); const p = JSON.parse(atob(b.accessToken.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); const antigo = JSON.parse(atob(pm.environment.get('accessUsuario').split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); const cookie = pm.response.headers.get('Set-Cookie'); pm.test('200', () => { pm.response.to.have.status(200); pm.expect(p.jti).to.not.eql(antigo.jti); pm.expect(p.sub).to.eql(antigo.sub); pm.environment.set('accessAntigo', pm.environment.get('accessUsuario')); pm.environment.set('refreshAntigo', pm.environment.get('refreshUsuario')); pm.environment.set('accessUsuario', b.accessToken); pm.environment.set('refreshUsuario', cookie.split(';')[0].substring('refresh_token='.length)); });"]}}]},
-        {"name": "refreshToken_401_reuso", "request": {"method": "POST", "header": [{"key": "Cookie", "value": "refresh_token={{refreshAntigo}}"}], "url": "{{baseUrl}}/api/v1/auth/refresh_token"}, "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('401', () => { pm.response.to.have.status(401); pm.expect(pm.response.json().codigoErro).to.eql('NAO_AUTENTICADO'); });"]}}]},
-        {"name": "me_401_revogado", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{accessAntigo}}"}], "url": "{{baseUrl}}/api/v1/auth/me"}, "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('401', () => { pm.response.to.have.status(401); pm.expect(pm.response.json().codigoErro).to.eql('NAO_AUTENTICADO'); });"]}}]},
-        {"name": "me_401_ausente", "request": {"method": "GET", "url": "{{baseUrl}}/api/v1/auth/me"}, "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('401', () => { pm.response.to.have.status(401); pm.expect(pm.response.json().codigoErro).to.eql('NAO_AUTENTICADO'); });"]}}]},
-        {"name": "me_401_adulterado", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer aaa.bbb.ccc"}], "url": "{{baseUrl}}/api/v1/auth/me"}, "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('401', () => { pm.response.to.have.status(401); });"]}}]},
-        {"name": "logout_401", "request": {"method": "POST", "url": "{{baseUrl}}/api/v1/auth/logout"}, "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('401', () => { pm.response.to.have.status(401); pm.expect(pm.response.json().codigoErro).to.eql('NAO_AUTENTICADO'); });"]}}]},
-        {"name": "logout_204", "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{accessUsuario}}"}, {"key": "Cookie", "value": "refresh_token={{refreshUsuario}}"}], "url": "{{baseUrl}}/api/v1/auth/logout"}, "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('204', () => { pm.response.to.have.status(204); pm.expect(pm.response.headers.get('Set-Cookie')).to.include('Max-Age=0'); });"]}}]},
-        {"name": "refreshToken_401_ausente", "request": {"method": "POST", "header": [{"key": "Cookie", "value": "refresh_token={{refreshUsuario}}"}], "url": "{{baseUrl}}/api/v1/auth/refresh_token"}, "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('401', () => { pm.response.to.have.status(401); pm.expect(pm.response.json().codigoErro).to.eql('NAO_AUTENTICADO'); });"]}}]}
+        {
+          "name": "login_400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => { pm.response.to.have.status(400); const b = pm.response.json(); pm.expect(b.codigoErro).to.eql('VALIDACAO'); pm.expect(b.erros.length).to.be.above(0); pm.expect(b.erros[0]).to.have.property('campo'); pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "login_401_inexistente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"nao-existe@fincontrol.local\",\"senha\":\"{{senha}}\"}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); const b = pm.response.json(); pm.expect(b.codigoErro).to.eql('NAO_AUTENTICADO'); pm.expect(b.detail).to.eql('Não autenticado.'); pm.expect(b.detail).to.not.include('Exception'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "login_401_inativo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{emailInativo}}\",\"senha\":\"{{senha}}\"}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); pm.expect(pm.response.json().codigoErro).to.eql('NAO_AUTENTICADO'); pm.expect(pm.response.json().detail).to.eql('Não autenticado.'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "login_401_cliente_inativo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{emailClienteInativo}}\",\"senha\":\"{{senha}}\"}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); pm.expect(pm.response.json().detail).to.eql('Não autenticado.'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "login_401_senha",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{emailUsuario}}\",\"senha\":\"senha-errada\"}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); pm.expect(pm.response.json().detail).to.eql('Não autenticado.'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "login_200_master",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{emailMaster}}\",\"senha\":\"{{senha}}\"}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const b = pm.response.json(); const p = JSON.parse(atob(b.accessToken.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); pm.test('200', () => { pm.response.to.have.status(200); pm.expect(p.iss).to.eql('fincontrol'); pm.expect(p.role).to.eql('MASTER'); pm.expect(p.clienteId).to.be.undefined; pm.expect(p.jti).to.match(/^[0-9a-f-]{36}$/i); pm.expect(p.nbf).to.eql(p.iat); pm.expect(p.exp - p.iat).to.eql(900); pm.expect(Object.keys(p).sort()).to.eql(['exp','iat','iss','jti','nbf','role','sub']); pm.expect(Object.keys(b).sort()).to.eql(['accessToken','expiresIn','tokenType']); pm.environment.set('accessMaster', b.accessToken); pm.environment.set('subMaster', p.sub); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "me_200_master",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessMaster}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/me"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); const b = pm.response.json(); pm.expect(b.role).to.eql('MASTER'); pm.expect(b.clienteId).to.eql(null); pm.expect(b.id).to.eql(pm.environment.get('subMaster')); pm.expect(b).to.not.have.property('senha'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "login_200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{emailUsuario}}\",\"senha\":\"{{senha}}\"}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const b = pm.response.json(); const p = JSON.parse(atob(b.accessToken.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); const cookie = pm.response.headers.get('Set-Cookie'); pm.test('200', () => { pm.response.to.have.status(200); pm.expect(p.role).to.eql('ADMIN'); pm.expect(p.clienteId).to.be.a('string'); pm.expect(p.iss).to.eql('fincontrol'); pm.expect(p.exp - p.iat).to.eql(900); pm.expect(b.refreshToken).to.be.a('string'); pm.expect(cookie).to.include('refresh_token=' + b.refreshToken); pm.expect(cookie).to.include('HttpOnly'); pm.expect(cookie).to.include('SameSite=Strict'); pm.expect(cookie).to.include('Path=/api/v1/auth'); pm.environment.set('accessUsuario', b.accessToken); pm.environment.set('subUsuario', p.sub); pm.environment.set('clienteUsuario', p.clienteId); pm.environment.set('refreshUsuario', b.refreshToken); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "me_200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/me"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); const b = pm.response.json(); pm.expect(b.id).to.eql(pm.environment.get('subUsuario')); pm.expect(b.role).to.eql('ADMIN'); pm.expect(b.clienteId).to.eql(pm.environment.get('clienteUsuario')); pm.expect(b.email).to.eql(pm.environment.get('emailUsuario')); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "login_200_mae",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{emailMae}}\",\"senha\":\"{{senha}}\"}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const p = JSON.parse(atob(pm.response.json().accessToken.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); pm.test('200', () => { pm.response.to.have.status(200); pm.expect(p.role).to.eql('ADMIN'); pm.expect(p.clienteId).to.not.eql(pm.environment.get('clienteUsuario')); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarCliente_401",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nomeCliente\":\"X\",\"nomeAdministrador\":\"Y\",\"emailAdministrador\":\"y@fincontrol.local\",\"senhaAdministrador\":\"segredo123\"}"
+            },
+            "url": "{{baseUrl}}/api/v1/master/clientes"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); pm.expect(pm.response.json().codigoErro).to.eql('NAO_AUTENTICADO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarCliente_403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nomeCliente\":\"X\",\"nomeAdministrador\":\"Y\",\"emailAdministrador\":\"y@fincontrol.local\",\"senhaAdministrador\":\"segredo123\"}"
+            },
+            "url": "{{baseUrl}}/api/v1/master/clientes"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); pm.expect(pm.response.json().codigoErro).to.eql('ACESSO_NEGADO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarCliente_400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessMaster}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nomeCliente\":\"\",\"nomeAdministrador\":\"Y\",\"emailAdministrador\":\"nao-email\",\"senhaAdministrador\":\"curta\"}"
+            },
+            "url": "{{baseUrl}}/api/v1/master/clientes"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => { pm.response.to.have.status(400); pm.expect(pm.response.json().codigoErro).to.eql('VALIDACAO'); pm.expect(pm.response.json().erros.length).to.be.above(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarCliente_201",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.environment.set('emailNovo', 'novo-' + Date.now() + '@fincontrol.local');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => { pm.response.to.have.status(201); const b = pm.response.json(); pm.expect(b.clienteId).to.be.a('string'); pm.expect(b.administradorId).to.be.a('string'); pm.expect(b).to.not.have.property('senha'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessMaster}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nomeCliente\":\"Novo\",\"nomeAdministrador\":\"Novo Admin\",\"emailAdministrador\":\"{{emailNovo}}\",\"senhaAdministrador\":\"{{senha}}\"}"
+            },
+            "url": "{{baseUrl}}/api/v1/master/clientes"
+          }
+        },
+        {
+          "name": "login_429",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "function falhar(n){ if(n===0){return;} pm.sendRequest({url: pm.environment.get('baseUrl')+'/api/v1/auth/login', method:'POST', header:{'Content-Type':'application/json'}, body:{mode:'raw', raw: JSON.stringify({email: pm.environment.get('emailNovo'), senha:'errada-demais'})}}, function(){ falhar(n-1); }); } falhar(4);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('429', () => { pm.response.to.have.status(429); pm.expect(pm.response.json().codigoErro).to.eql('LOGIN_BLOQUEADO'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{emailNovo}}\",\"senha\":\"errada-demais\"}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          }
+        },
+        {
+          "name": "refreshToken_200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Refresh-Token",
+                "value": "{{refreshUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/refresh_token"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const b = pm.response.json(); const p = JSON.parse(atob(b.accessToken.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); const antigo = JSON.parse(atob(pm.environment.get('accessUsuario').split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); const cookie = pm.response.headers.get('Set-Cookie'); pm.test('200', () => { pm.response.to.have.status(200); pm.expect(p.jti).to.not.eql(antigo.jti); pm.expect(p.sub).to.eql(antigo.sub); pm.expect(b.refreshToken).to.be.a('string'); pm.expect(b.refreshToken).to.not.eql(pm.environment.get('refreshUsuario')); pm.expect(cookie).to.include('refresh_token=' + b.refreshToken); pm.environment.set('accessAntigo', pm.environment.get('accessUsuario')); pm.environment.set('refreshAntigo', pm.environment.get('refreshUsuario')); pm.environment.set('accessUsuario', b.accessToken); pm.environment.set('refreshUsuario', b.refreshToken); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "refreshToken_401_reuso",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "refresh_token={{refreshAntigo}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/refresh_token"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); pm.expect(pm.response.json().codigoErro).to.eql('NAO_AUTENTICADO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "me_401_revogado",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessAntigo}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/me"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); pm.expect(pm.response.json().codigoErro).to.eql('NAO_AUTENTICADO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "me_401_ausente",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/auth/me"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); pm.expect(pm.response.json().codigoErro).to.eql('NAO_AUTENTICADO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "me_401_adulterado",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer aaa.bbb.ccc"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/me"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "logout_401",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/auth/logout"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); pm.expect(pm.response.json().codigoErro).to.eql('NAO_AUTENTICADO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "logout_204",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/logout"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204', () => { pm.response.to.have.status(204); pm.expect(pm.response.headers.get('Set-Cookie')).to.include('Max-Age=0'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "refreshToken_401_ausente",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/auth/refresh_token"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); pm.expect(pm.response.json().codigoErro).to.eql('NAO_AUTENTICADO'); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "categorias",
+      "item": [
+        {
+          "request": {
+            "body": {
+              "raw": "{\"email\":\"{{emailUsuario}}\",\"senha\":\"{{senha}}\"}",
+              "mode": "raw"
+            },
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/auth/login",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "name": "login_200_catalogo",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "const b = pm.response.json(); const p = JSON.parse(atob(b.accessToken.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); pm.test('200', () => { pm.response.to.have.status(200); pm.environment.set('accessUsuario', b.accessToken); pm.environment.set('clienteUsuario', p.clienteId); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "body": {
+              "raw": "{\"email\":\"{{emailLeitor}}\",\"senha\":\"{{senha}}\"}",
+              "mode": "raw"
+            },
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/auth/login",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "name": "login_200_leitor",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "const b = pm.response.json(); pm.test('200', () => { pm.response.to.have.status(200); pm.environment.set('accessLeitor', b.accessToken); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/categorias",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ]
+          },
+          "name": "listarCategorias_200",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); const b = pm.response.json(); pm.expect(b.map(c => c.nome)).to.include('Salário'); pm.expect(b.map(c => c.nome)).to.include('Benefícios'); pm.expect(b[0]).to.not.have.property('senha'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/categorias",
+            "header": []
+          },
+          "name": "listarCategorias_401",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); pm.expect(pm.response.json().codigoErro).to.eql('NAO_AUTENTICADO'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/categorias",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessMaster}}"
+              }
+            ]
+          },
+          "name": "listarCategorias_403",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); pm.expect(pm.response.json().codigoErro).to.eql('ACESSO_NEGADO'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "body": {
+              "raw": "{\"nome\":\"\",\"natureza\":\"DESPESA\"}",
+              "mode": "raw"
+            },
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/categorias",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ]
+          },
+          "name": "criarCategoria_400",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('400', () => { pm.response.to.have.status(400); pm.expect(pm.response.json().codigoErro).to.eql('VALIDACAO'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "body": {
+              "raw": "{\"nome\":\"Salário\",\"natureza\":\"RECEITA\"}",
+              "mode": "raw"
+            },
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/categorias",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "name": "criarCategoria_401",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); pm.expect(pm.response.json().codigoErro).to.eql('NAO_AUTENTICADO'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "body": {
+              "raw": "{\"nome\":\"Salário\",\"natureza\":\"RECEITA\"}",
+              "mode": "raw"
+            },
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/categorias",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessLeitor}}"
+              }
+            ]
+          },
+          "name": "criarCategoria_403",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); pm.expect(pm.response.json().codigoErro).to.eql('ACESSO_NEGADO'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "body": {
+              "raw": "{\"nome\":\"Salário\",\"natureza\":\"RECEITA\"}",
+              "mode": "raw"
+            },
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/categorias",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ]
+          },
+          "name": "criarCategoria_422",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('422', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().codigoErro).to.eql('NOME_EM_USO'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "body": {
+              "raw": "{\"nome\":\"Lazer {{$timestamp}}\",\"natureza\":\"DESPESA\"}",
+              "mode": "raw"
+            },
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/categorias",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ]
+          },
+          "name": "criarCategoria_201",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('201', () => { pm.response.to.have.status(201); const b = pm.response.json(); pm.expect(b.id).to.be.a('string'); pm.expect(b.natureza).to.eql('DESPESA'); pm.expect(b).to.not.have.property('senha'); pm.environment.set('idCategoria', b.id); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "body": {
+              "raw": "{\"nome\":\"\",\"natureza\":\"DESPESA\"}",
+              "mode": "raw"
+            },
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/v1/categorias/{{idCategoria}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ]
+          },
+          "name": "atualizarCategoria_400",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('400', () => { pm.response.to.have.status(400); pm.expect(pm.response.json().codigoErro).to.eql('VALIDACAO'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "body": {
+              "raw": "{\"nome\":\"Salário\",\"natureza\":\"RECEITA\"}",
+              "mode": "raw"
+            },
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/v1/categorias/{{idCategoria}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "name": "atualizarCategoria_401",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "body": {
+              "raw": "{\"nome\":\"Salário\",\"natureza\":\"RECEITA\"}",
+              "mode": "raw"
+            },
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/v1/categorias/{{idCategoria}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessLeitor}}"
+              }
+            ]
+          },
+          "name": "atualizarCategoria_403",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); pm.expect(pm.response.json().codigoErro).to.eql('ACESSO_NEGADO'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "body": {
+              "raw": "{\"nome\":\"Inexistente\",\"natureza\":\"DESPESA\"}",
+              "mode": "raw"
+            },
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/v1/categorias/99999999",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ]
+          },
+          "name": "atualizarCategoria_404",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); pm.expect(pm.response.json().codigoErro).to.eql('NAO_ENCONTRADO'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "body": {
+              "raw": "{\"nome\":\"Salário\",\"natureza\":\"RECEITA\"}",
+              "mode": "raw"
+            },
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/v1/categorias/{{idCategoria}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ]
+          },
+          "name": "atualizarCategoria_422",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('422', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().codigoErro).to.eql('NOME_EM_USO'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "body": {
+              "raw": "{\"nome\":\"Lazer editado\",\"natureza\":\"DESPESA\"}",
+              "mode": "raw"
+            },
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/v1/categorias/{{idCategoria}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ]
+          },
+          "name": "atualizarCategoria_200",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().nome).to.eql('Lazer editado'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/v1/categorias/{{idCategoria}}",
+            "header": []
+          },
+          "name": "excluirCategoria_401",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/v1/categorias/{{idCategoria}}",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessLeitor}}"
+              }
+            ]
+          },
+          "name": "excluirCategoria_403",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/v1/categorias/99999998",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ]
+          },
+          "name": "excluirCategoria_404",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); pm.expect(pm.response.json().codigoErro).to.eql('NAO_ENCONTRADO'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/v1/categorias/{{idCategoria}}",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ]
+          },
+          "name": "excluirCategoria_204",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('204', () => { pm.response.to.have.status(204); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "contas",
+      "item": [
+        {
+          "request": {
+            "body": {
+              "raw": "{\"email\":\"{{emailUsuario}}\",\"senha\":\"{{senha}}\"}",
+              "mode": "raw"
+            },
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/auth/login",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "name": "login_200_contas",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "const b = pm.response.json(); const p = JSON.parse(atob(b.accessToken.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); pm.test('200', () => { pm.response.to.have.status(200); pm.environment.set('accessUsuario', b.accessToken); pm.environment.set('clienteUsuario', p.clienteId); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "body": {
+              "raw": "{\"email\":\"{{emailMae}}\",\"senha\":\"{{senha}}\"}",
+              "mode": "raw"
+            },
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/auth/login",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "name": "login_200_mae_contas",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "const b = pm.response.json(); const p = JSON.parse(atob(b.accessToken.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); pm.test('200', () => { pm.response.to.have.status(200); pm.environment.set('accessMae', b.accessToken); pm.expect(p.clienteId).to.not.eql(pm.environment.get('clienteUsuario')); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/contas",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ]
+          },
+          "name": "listarContas_200",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); const b = pm.response.json(); const nubank = b.find(c => c.nome === 'Nubank'); const flash = b.find(c => c.nome === 'Flash'); pm.expect(nubank.tipo).to.eql('CORRENTE'); pm.expect(flash.tipo).to.eql('BENEFICIO'); pm.expect(flash.limite).to.eql(null); pm.expect(b[0]).to.not.have.property('senha'); pm.environment.set('idNubank', nubank.id); pm.environment.set('idFlash', flash.id); pm.environment.set('saldoNubank', nubank.saldoInicial); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/contas",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessMae}}"
+              }
+            ]
+          },
+          "name": "listarContas_200_mae",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); const b = pm.response.json(); pm.expect(b.map(c => c.nome)).to.not.include('Flash'); pm.expect(b.map(c => c.nome)).to.include('Banco do Brasil'); pm.environment.set('idMae', b[0].id); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/contas",
+            "header": []
+          },
+          "name": "listarContas_401",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); pm.expect(pm.response.json().codigoErro).to.eql('NAO_AUTENTICADO'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/contas",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessMaster}}"
+              }
+            ]
+          },
+          "name": "listarContas_403",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); pm.expect(pm.response.json().codigoErro).to.eql('ACESSO_NEGADO'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "body": {
+              "raw": "{\"nome\":\"\",\"banco\":\"\",\"tipo\":\"CORRENTE\",\"saldoInicial\":\"abc\",\"dataSaldo\":\"2026-01-01\"}",
+              "mode": "raw"
+            },
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/contas",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ]
+          },
+          "name": "criarConta_400",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('400', () => { pm.response.to.have.status(400); pm.expect(pm.response.json().codigoErro).to.eql('VALIDACAO'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "body": {
+              "raw": "{\"nome\":\"Extra {{$timestamp}}\",\"banco\":\"Nubank\",\"tipo\":\"CORRENTE\",\"saldoInicial\":\"0\",\"dataSaldo\":\"2026-01-01\"}",
+              "mode": "raw"
+            },
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/contas",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "name": "criarConta_401",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "body": {
+              "raw": "{\"nome\":\"Extra {{$timestamp}}\",\"banco\":\"Nubank\",\"tipo\":\"CORRENTE\",\"saldoInicial\":\"0\",\"dataSaldo\":\"2026-01-01\"}",
+              "mode": "raw"
+            },
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/contas",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessLeitor}}"
+              }
+            ]
+          },
+          "name": "criarConta_403",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); pm.expect(pm.response.json().codigoErro).to.eql('ACESSO_NEGADO'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "body": {
+              "raw": "{\"nome\":\"Flash extra\",\"banco\":\"Flash\",\"tipo\":\"BENEFICIO\",\"saldoInicial\":\"0\",\"dataSaldo\":\"2026-01-01\",\"limite\":\"10.00\"}",
+              "mode": "raw"
+            },
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/contas",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ]
+          },
+          "name": "criarConta_422",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('422', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().codigoErro).to.eql('LIMITE_INVALIDO'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "body": {
+              "raw": "{\"nome\":\"Nubank\",\"banco\":\"Nubank\",\"tipo\":\"CORRENTE\",\"saldoInicial\":\"0\",\"dataSaldo\":\"2026-01-01\"}",
+              "mode": "raw"
+            },
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/contas",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ]
+          },
+          "name": "criarConta_422_nome",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('422', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().codigoErro).to.eql('NOME_EM_USO'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "body": {
+              "raw": "{\"nome\":\"Extra {{$timestamp}}\",\"banco\":\"Nubank\",\"tipo\":\"CORRENTE\",\"saldoInicial\":\"0\",\"dataSaldo\":\"2026-01-01\"}",
+              "mode": "raw"
+            },
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/contas",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ]
+          },
+          "name": "criarConta_201",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('201', () => { pm.response.to.have.status(201); const b = pm.response.json(); pm.expect(b.id).to.be.a('string'); pm.expect(b).to.not.have.property('senha'); pm.environment.set('idContaExtra', b.id); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/contas/{{idFlash}}",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ]
+          },
+          "name": "obterConta_200",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().tipo).to.eql('BENEFICIO'); pm.expect(pm.response.json().nome).to.eql('Flash'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/contas/{{idFlash}}",
+            "header": []
+          },
+          "name": "obterConta_401",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/contas/{{idFlash}}",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessMaster}}"
+              }
+            ]
+          },
+          "name": "obterConta_403",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/contas/99999999",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ]
+          },
+          "name": "obterConta_404",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); pm.expect(pm.response.json().codigoErro).to.eql('NAO_ENCONTRADO'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/contas/{{idMae}}",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ]
+          },
+          "name": "obterConta_404_outro",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); pm.expect(pm.response.json().codigoErro).to.eql('NAO_ENCONTRADO'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/contas/{{idFlash}}",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessMae}}"
+              }
+            ]
+          },
+          "name": "obterConta_404_casa",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); pm.expect(pm.response.json().codigoErro).to.eql('NAO_ENCONTRADO'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "body": {
+              "raw": "{\"nome\":\"\",\"banco\":\"\",\"tipo\":\"CORRENTE\",\"saldoInicial\":\"abc\",\"dataSaldo\":\"2026-01-01\"}",
+              "mode": "raw"
+            },
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/v1/contas/{{idFlash}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ]
+          },
+          "name": "atualizarConta_400",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('400', () => { pm.response.to.have.status(400); pm.expect(pm.response.json().codigoErro).to.eql('VALIDACAO'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "body": {
+              "raw": "{\"nome\":\"Flash\",\"banco\":\"Flash\",\"tipo\":\"BENEFICIO\",\"saldoInicial\":\"10.00\",\"dataSaldo\":\"2026-01-01\"}",
+              "mode": "raw"
+            },
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/v1/contas/{{idFlash}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "name": "atualizarConta_401",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "body": {
+              "raw": "{\"nome\":\"Flash\",\"banco\":\"Flash\",\"tipo\":\"BENEFICIO\",\"saldoInicial\":\"10.00\",\"dataSaldo\":\"2026-01-01\"}",
+              "mode": "raw"
+            },
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/v1/contas/{{idFlash}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessLeitor}}"
+              }
+            ]
+          },
+          "name": "atualizarConta_403",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "body": {
+              "raw": "{\"nome\":\"Flash\",\"banco\":\"Flash\",\"tipo\":\"BENEFICIO\",\"saldoInicial\":\"10.00\",\"dataSaldo\":\"2026-01-01\"}",
+              "mode": "raw"
+            },
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/v1/contas/99999999",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ]
+          },
+          "name": "atualizarConta_404",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); pm.expect(pm.response.json().codigoErro).to.eql('NAO_ENCONTRADO'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "body": {
+              "raw": "{\"nome\":\"Nubank\",\"banco\":\"Flash\",\"tipo\":\"BENEFICIO\",\"saldoInicial\":\"0\",\"dataSaldo\":\"2026-01-01\"}",
+              "mode": "raw"
+            },
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/v1/contas/{{idFlash}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ]
+          },
+          "name": "atualizarConta_422",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('422', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().codigoErro).to.eql('NOME_EM_USO'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "body": {
+              "raw": "{\"nome\":\"Flash\",\"banco\":\"Flash\",\"tipo\":\"BENEFICIO\",\"saldoInicial\":\"10.00\",\"dataSaldo\":\"2026-01-01\"}",
+              "mode": "raw"
+            },
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/v1/contas/{{idFlash}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ]
+          },
+          "name": "atualizarConta_200",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().saldoInicial).to.eql('10.00'); pm.expect(pm.response.json().tipo).to.eql('BENEFICIO'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/contas/{{idNubank}}",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ]
+          },
+          "name": "obterConta_200_nubank",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().saldoInicial).to.eql(pm.environment.get('saldoNubank')); pm.expect(pm.response.json().nome).to.eql('Nubank'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/v1/contas/{{idContaExtra}}",
+            "header": []
+          },
+          "name": "excluirConta_401",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/v1/contas/{{idContaExtra}}",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessLeitor}}"
+              }
+            ]
+          },
+          "name": "excluirConta_403",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/v1/contas/99999998",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ]
+          },
+          "name": "excluirConta_404",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); pm.expect(pm.response.json().codigoErro).to.eql('NAO_ENCONTRADO'); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        },
+        {
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/v1/contas/{{idContaExtra}}",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ]
+          },
+          "name": "excluirConta_204",
+          "event": [
+            {
+              "script": {
+                "exec": [
+                  "pm.test('204', () => { pm.response.to.have.status(204); });"
+                ],
+                "type": "text/javascript"
+              },
+              "listen": "test"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "lancamentos",
+      "item": [
+        {
+          "name": "listarCategorias_200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/categorias"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); const c = pm.response.json().find(x => x.nome === 'Alimentação'); pm.environment.set('idCategoria', c.id); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarContas_200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/contas"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.environment.set('idConta', pm.response.json()[0].id); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "login_200_leitor_lancamentos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{emailLeitor}}\",\"senha\":\"{{senha}}\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.environment.set('accessLeitor', pm.response.json().accessToken); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarLancamentos_200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.expect(pm.response.json()).to.be.an('array'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarLancamentos_401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/lancamentos"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarLancamentos_403",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessMaster}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarLancamento_201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2026-11-10\",\"descricao\":\"Compra\",\"parcelas\":2}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => { pm.response.to.have.status(201); const b = pm.response.json(); pm.expect(b.parcelas).to.have.lengthOf(2); pm.expect(b.grupoParcela).to.be.a('string'); pm.environment.set('idLancamento', b.parcelas[0].id); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarLancamento_400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2026-11-10\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => { pm.response.to.have.status(400); pm.expect(pm.response.json().codigoErro).to.eql('VALIDACAO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarLancamento_401",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2026-11-10\",\"descricao\":\"Compra\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarLancamento_403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessLeitor}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2026-11-10\",\"descricao\":\"Compra\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarLancamento_422",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2026-11-10\",\"descricao\":\"Compra\",\"parcelas\":61}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().codigoErro).to.eql('PARCELA_INVALIDA'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "fecharMes_200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2025/3/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarLancamento_409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2025-03-10\",\"descricao\":\"Compra\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('409', () => { pm.response.to.have.status(409); pm.expect(pm.response.json().codigoErro).to.eql('MES_FECHADO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "reabrirMes_204",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2025/3/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204', () => { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "obterLancamento_200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().id).to.eql(pm.environment.get('idLancamento')); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "obterLancamento_401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "obterLancamento_403",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessMaster}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "obterLancamento_404",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/999999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "atualizarLancamento_200",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2026-11-12\",\"descricao\":\"Compra\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().data).to.eql('2026-11-12'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "atualizarLancamento_400",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2026-11-12\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "atualizarLancamento_401",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2026-11-12\",\"descricao\":\"Compra\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "atualizarLancamento_403",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessLeitor}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2026-11-12\",\"descricao\":\"Compra\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "atualizarLancamento_404",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/999999",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2026-11-12\",\"descricao\":\"Compra\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarLancamento_201_abril",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2025-04-10\",\"descricao\":\"Compra\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => { pm.response.to.have.status(201); pm.environment.set('idAbril', pm.response.json().parcelas[0].id); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "fecharMes_200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2025/4/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "atualizarLancamento_409",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idAbril}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2025-04-11\",\"descricao\":\"Compra\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('409', () => { pm.response.to.have.status(409); pm.expect(pm.response.json().codigoErro).to.eql('MES_FECHADO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "reabrirMes_204",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2025/4/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204', () => { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "estornarLancamento_200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}/estorno",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"motivo\":\"engano\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().estornado).to.eql(true); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "estornarLancamento_400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}/estorno",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"motivo\":\"\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "estornarLancamento_401",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}/estorno",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"motivo\":\"x\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "estornarLancamento_403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessLeitor}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}/estorno",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"motivo\":\"x\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "estornarLancamento_404",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/999999/estorno",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"motivo\":\"x\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarLancamento_201_maio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2025-05-10\",\"descricao\":\"Compra\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => { pm.response.to.have.status(201); pm.environment.set('idMaio', pm.response.json().parcelas[0].id); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "fecharMes_200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2025/5/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "estornarLancamento_409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idMaio}}/estorno",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"motivo\":\"x\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('409', () => { pm.response.to.have.status(409); pm.expect(pm.response.json().codigoErro).to.eql('MES_FECHADO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "reabrirMes_204",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2025/5/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204', () => { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "estornarLancamento_422",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}/estorno",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"motivo\":\"de novo\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().codigoErro).to.eql('ESTORNO_REPETIDO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "atualizarLancamento_422",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2026-11-13\",\"descricao\":\"Compra\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().codigoErro).to.eql('LANCAMENTO_ESTORNADO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarLancamento_201_excluir",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2026-11-11\",\"descricao\":\"Compra\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => { pm.response.to.have.status(201); pm.environment.set('idExcluir', pm.response.json().parcelas[0].id); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "excluirLancamento_204",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idExcluir}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204', () => { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "excluirLancamento_401",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "excluirLancamento_403",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessLeitor}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "excluirLancamento_404",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/999999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "criarLancamento_201_junho",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contaId\":\"{{idConta}}\",\"categoriaId\":\"{{idCategoria}}\",\"natureza\":\"DESPESA\",\"tipoDespesa\":\"VARIAVEL\",\"valor\":\"100.00\",\"data\":\"2025-06-10\",\"descricao\":\"Compra\",\"parcelas\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => { pm.response.to.have.status(201); pm.environment.set('idJunho', pm.response.json().parcelas[0].id); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "fecharMes_200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2025/6/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "excluirLancamento_409",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idJunho}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('409', () => { pm.response.to.have.status(409); pm.expect(pm.response.json().codigoErro).to.eql('MES_FECHADO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "reabrirMes_204",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2025/6/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204', () => { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "excluirLancamento_422",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/lancamentos/{{idLancamento}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().codigoErro).to.eql('LANCAMENTO_ESTORNADO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "obterSaldoConta_200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/contas/{{idConta}}/saldo"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().saldo).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "obterSaldoConta_401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/contas/{{idConta}}/saldo"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "obterSaldoConta_403",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessMaster}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/contas/{{idConta}}/saldo"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "obterSaldoConta_404",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/contas/999999/saldo"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "meses",
+      "item": [
+        {
+          "name": "listarMeses_200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.expect(pm.response.json()).to.be.an('array'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarMeses_401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/meses"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "listarMeses_403",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessMaster}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "fecharMes_200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2024/1/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().ano).to.eql(2024); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "fecharMes_400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2026/13/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => { pm.response.to.have.status(400); pm.expect(pm.response.json().codigoErro).to.eql('VALIDACAO'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "fecharMes_401",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/meses/2024/2/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "fecharMes_403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessLeitor}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2024/2/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "reabrirMes_204",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2024/1/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204', () => { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "reabrirMes_400",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2026/13/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "reabrirMes_401",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/meses/2024/3/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "reabrirMes_403",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessLeitor}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2024/3/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "reabrirMes_404",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessUsuario}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/meses/2026/1/fechamento"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        }
       ]
     }
   ]

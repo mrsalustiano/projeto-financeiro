@@ -45,8 +45,8 @@ public class AuthController implements AuthApi {
     }
 
     @Override
-    public ResponseEntity<Void> logout(String refreshToken) {
-        encerrar.executar(SessaoAtual.exigir(), refreshToken);
+    public ResponseEntity<Void> logout() {
+        encerrar.executar(SessaoAtual.exigir());
         return ResponseEntity.noContent().header(HttpHeaders.SET_COOKIE, cookie.apagar().toString()).build();
     }
 
@@ -60,13 +60,21 @@ public class AuthController implements AuthApi {
     }
 
     @Override
-    public ResponseEntity<TokenResponse> refreshToken(String refreshToken) {
-        SessaoEmitida sessao = renovar.executar(refreshToken);
+    public ResponseEntity<TokenResponse> refreshToken(String xRefreshToken, String refreshToken) {
+        SessaoEmitida sessao = renovar.executar(opaco(xRefreshToken, refreshToken));
         return comCookie(sessao, cookie.criar(sessao.refreshOpaco()).toString());
     }
 
+    private static String opaco(String header, String cookie) {
+        if (header != null && !header.isBlank()) {
+            return header.trim();
+        }
+        return cookie;
+    }
+
     private static ResponseEntity<TokenResponse> comCookie(SessaoEmitida sessao, String setCookie) {
-        TokenResponse corpo = new TokenResponse(sessao.accessToken(), "Bearer", DuracaoSessao.ACCESS_SEGUNDOS);
+        TokenResponse corpo = new TokenResponse(
+                sessao.accessToken(), "Bearer", DuracaoSessao.ACCESS_SEGUNDOS, sessao.refreshOpaco());
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, setCookie).body(corpo);
     }
 }

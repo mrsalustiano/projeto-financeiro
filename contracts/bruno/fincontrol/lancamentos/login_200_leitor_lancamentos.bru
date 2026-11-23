@@ -1,0 +1,24 @@
+meta {
+  name: login_200_leitor_lancamentos
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+{"email":"{{emailLeitor}}","senha":"{{senha}}"}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(200);
+  bru.setVar('accessLeitor', res.getBody().accessToken);
+}

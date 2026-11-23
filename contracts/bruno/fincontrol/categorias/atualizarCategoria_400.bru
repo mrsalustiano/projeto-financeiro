@@ -1,0 +1,24 @@
+﻿meta {
+  name: atualizarCategoria_400
+  type: http
+  seq: 1
+}
+
+put {
+  url: {{baseUrl}}/api/v1/categorias/{{idCategoria}}
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  authorization: Bearer {{accessUsuario}}
+}
+
+body:json {
+{ "nome": "", "natureza": "DESPESA" }
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(400);
+}

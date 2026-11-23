@@ -1,0 +1,25 @@
+meta {
+  name: criarLancamento_201_excluir
+  type: http
+  seq: 39
+}
+
+post {
+  url: {{baseUrl}}/api/v1/lancamentos
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  authorization: Bearer {{accessUsuario}}
+}
+
+body:json {
+{"contaId":"{{idConta}}","categoriaId":"{{idCategoria}}","natureza":"DESPESA","tipoDespesa":"VARIAVEL","valor":"100.00","data":"2026-11-11","descricao":"Compra","parcelas":1}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(201);
+  bru.setVar('idExcluir', res.getBody().parcelas[0].id);
+}

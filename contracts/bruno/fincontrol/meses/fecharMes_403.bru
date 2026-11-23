@@ -1,0 +1,19 @@
+meta {
+  name: fecharMes_403
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/v1/meses/2024/2/fechamento
+  body: none
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessLeitor}}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(403);
+}

@@ -1,0 +1,24 @@
+﻿meta {
+  name: atualizarConta_422
+  type: http
+  seq: 1
+}
+
+put {
+  url: {{baseUrl}}/api/v1/contas/{{idFlash}}
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  authorization: Bearer {{accessUsuario}}
+}
+
+body:json {
+{ "nome": "Nubank", "banco": "Flash", "tipo": "BENEFICIO", "saldoInicial": "0", "dataSaldo": "2026-01-01" }
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(422);
+}

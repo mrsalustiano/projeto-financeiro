@@ -16,6 +16,7 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     disable-swagger-default-url: true
+    persistAuthorization: true
     urls-primary-name: auth
     urls:
       - name: auth
@@ -26,6 +27,8 @@ springdoc:
         url: /contratos/categorias.yaml
       - name: contas
         url: /contratos/contas.yaml
+      - name: lancamentos
+        url: /contratos/lancamentos.yaml
 
 fincontrol:
   jwt:

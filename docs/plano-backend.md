@@ -250,9 +250,9 @@ Contrato `auth.yaml` e `master.yaml`. Quatro rotas de sessão, mais o bloqueio p
 
 | Método | Rota | Função |
 |---|---|---|
-| `POST` | `/api/v1/auth/login` | E-mail e senha. Devolve o access token. O refresh vai em cookie `HttpOnly`. |
-| `POST` | `/api/v1/auth/logout` | Revoga o refresh da sessão. |
-| `POST` | `/api/v1/auth/refresh_token` | Gira o refresh: o cookie usado morre e nasce outro. |
+| `POST` | `/api/v1/auth/login` | E-mail e senha. Devolve o access token e o `refreshToken` no corpo; o mesmo valor vai no header `X-Refresh-Token` e no cookie `HttpOnly`. |
+| `POST` | `/api/v1/auth/logout` | Exige `Authorization: Bearer`. Revoga o refresh e o `jti` da sessão. |
+| `POST` | `/api/v1/auth/refresh_token` | Gira o refresh: o valor usado morre e nasce outro. |
 | `GET` | `/api/v1/auth/me` | Devolve o usuário do token: id, nome, e-mail, perfil e `clienteId`. |
 
 A coleção Postman e a coleção Bruno desta fase cobrem o sucesso e o erro de cada uma, como na seção 15.
@@ -430,7 +430,7 @@ contracts/
 
 Uma pasta por domínio. Um pedido por cenário, nomeado com o `operationId` e o status (`login_200`, `login_401`). Pedido sem `operationId` correspondente no OpenAPI é erro. Falta o caminho feliz ou falta um erro aplicável, a fase não fecha. Um script `contract:check` compara os `operationId` do OpenAPI com os nomes dos pedidos e falha quando a cobertura não fecha.
 
-O ambiente traz `baseUrl` e um e-mail por pessoa (`emailUsuario`, `emailMae`, `emailMaster`). A senha do seed local fica só no ambiente da máquina, fora do Git. O pedido de login grava o access token. O cookie de refresh fica no jar do Postman e do Bruno. Nenhum token literal no arquivo da coleção.
+O ambiente traz `baseUrl` e um e-mail por pessoa (`emailUsuario`, `emailMae`, `emailMaster`). A senha do seed local fica só no ambiente da máquina, fora do Git. O pedido de login grava o access token e o refresh, que as requisições seguintes mandam no header `X-Refresh-Token`. Nenhum token literal no arquivo da coleção.
 
 Todo pedido tem teste, não só a chamada:
 
@@ -439,13 +439,13 @@ Todo pedido tem teste, não só a chamada:
 - no erro, presença de `type`, `title`, `status`, `detail`, `instance` e `codigoErro`, com o `status` do corpo igual ao HTTP;
 - `detail` sem stack, sem `Exception`, sem SQL;
 - sucesso confere o schema da resposta;
-- corpo de sucesso sem `senha`, `senha_hash`, `refresh_token` nem `Authorization`.
+- corpo de sucesso sem `senha`, `senha_hash` nem `Authorization`; o refresh só aparece no campo `refreshToken` do login e do refresh, nunca em outro corpo.
 
 ### Sessão, na fase 1
 
 | Pedido | Resultado |
 |---|---|
-| `POST /api/v1/auth/login` com e-mail e senha certos | 200, access token JWT, cookie de refresh, claims da seção 16 conferidas no payload, e em seguida `GET /me` devolve a mesma pessoa |
+| `POST /api/v1/auth/login` com e-mail e senha certos | 200, access token JWT, `refreshToken` no corpo igual ao header `X-Refresh-Token` e ao cookie, claims da seção 16 conferidas no payload, e em seguida `GET /me` com `Authorization: Bearer` devolve a mesma pessoa |
 | `POST /login` sem e-mail, sem senha ou e-mail malformado | 400 `VALIDACAO`, com `erros` por campo |
 | `POST /login` com senha errada | 401 `NAO_AUTENTICADO`, mensagem genérica |
 | `POST /login` com e-mail que não existe | 401 `NAO_AUTENTICADO`, a mesma mensagem, para não revelar se o e-mail existe |
@@ -453,11 +453,12 @@ Todo pedido tem teste, não só a chamada:
 | Várias falhas seguidas do mesmo e-mail | 429 `LOGIN_BLOQUEADO` até acabar o bloqueio |
 | `GET /api/v1/auth/me` com o access token | 200, com `clienteId` do seu cliente; no Master, `clienteId` nulo |
 | `GET /me` sem token, com token expirado ou adulterado | 401 `NAO_AUTENTICADO` |
-| `POST /api/v1/auth/refresh_token` com o cookie válido | 200, access token novo, cookie novo; o cookie anterior deixa de valer |
-| `POST /refresh_token` de novo com o cookie já girado | 401 `NAO_AUTENTICADO` |
-| `POST /refresh_token` sem cookie, com cookie expirado ou já revogado | 401 `NAO_AUTENTICADO` |
+| `POST /api/v1/auth/refresh_token` com o header `X-Refresh-Token` válido | 200, access token novo, `refreshToken` novo no corpo e cookie novo; o valor anterior deixa de valer |
+| `POST /refresh_token` de novo com o refresh já girado | 401 `NAO_AUTENTICADO` |
+| `POST /refresh_token` sem header nem cookie, com valor expirado ou já revogado | 401 `NAO_AUTENTICADO` |
 | `POST /api/v1/auth/logout` com sessão válida | 204, e o refresh seguinte responde 401 |
-| `POST /logout` sem sessão | 401 `NAO_AUTENTICADO` |
+| `POST /api/v1/auth/logout` com Bearer válido | 204, o refresh daquele `jti` é revogado e o refresh seguinte responde 401 |
+| `POST /logout` sem Bearer | 401 `NAO_AUTENTICADO` |
 
 O login do seu e-mail e o da sua mãe produzem tokens que não leem dados um do outro. Esse par de pedidos entra na pasta de auth e se repete em cada pasta de dado (conta, lançamento, extrato): 200 com o dono, 404 quando o id é do outro cliente.
 
@@ -487,7 +488,7 @@ A fase 1 implementa a sessão de verdade. O domínio pede um token por uma porta
 
 Access token é JWT compacto, assinatura **RS256**. A chave privada e a pública vêm de `JWT_PRIVATE_KEY_PEM` e `JWT_PUBLIC_KEY_PEM`. Não há chave no repositório nem no `application.yml`. O cabeçalho do token leva `alg=RS256` e `typ=JWT`. Algoritmo diferente, assinatura inválida ou chave trocada responde 401.
 
-O refresh **não** é JWT. É um valor opaco de 256 bits, guardado só como hash SHA-256 em `refresh_token`, enviado no cookie `refresh_token` com `HttpOnly`, `Secure` e `SameSite=Strict`, path `/api/v1/auth`, validade de 7 dias.
+O refresh **não** é JWT. É um valor opaco de 256 bits, guardado só como hash SHA-256 em `refresh_token`, devolvido no corpo do login e do refresh e aceito no header `X-Refresh-Token` (precedência) ou no cookie `refresh_token` com `HttpOnly`, `Secure` e `SameSite=Strict`, path `/api/v1/auth`, validade de 7 dias.
 
 ### Claims do access token
 
@@ -514,17 +515,18 @@ O filtro lê `role` e cria uma autoridade só: `ROLE_MASTER`, `ROLE_ADMIN`, `ROL
 {
   "accessToken": "<jwt>",
   "tokenType": "Bearer",
-  "expiresIn": 900
+  "expiresIn": 900,
+  "refreshToken": "<opaco>"
 }
 ```
 
-O cookie de refresh sai no `Set-Cookie`. O corpo não traz refresh, senha nem hash.
+O cookie de refresh sai no `Set-Cookie` com o mesmo valor de `refreshToken`, e o mesmo valor também é aceito no header `X-Refresh-Token`. O corpo não traz senha nem hash.
 
 `GET /api/v1/auth/me` exige `Authorization: Bearer`. A resposta sai do usuário carregado pelo `sub`, não de claim solta: `id`, `nome`, `email`, `role`, `clienteId`. Se o usuário ou o cliente estiver inativo, 401, mesmo com assinatura válida.
 
-`POST /api/v1/auth/refresh_token` lê o cookie, confere o hash e a validade, revoga essa linha e grava outra. A resposta tem o mesmo formato do login, com JWT novo (`jti` novo) e cookie novo. O cookie anterior e o access token anterior deixam de valer.
+`POST /api/v1/auth/refresh_token` lê o header `X-Refresh-Token` (ou o cookie, nessa ordem), confere o hash e a validade, revoga essa linha e grava outra. A resposta tem o mesmo formato do login, com JWT novo (`jti` novo), `refreshToken` novo no corpo e cookie novo. O valor anterior e o access token anterior deixam de valer.
 
-`POST /api/v1/auth/logout` revoga o refresh do cookie e invalida o `jti` do Bearer atual. Resposta 204. Sem sessão, 401.
+`POST /api/v1/auth/logout` exige `Authorization: Bearer` e revoga o refresh ligado ao `jti` atual mais o próprio `jti`. Resposta 204. Sem Bearer, 401.
 
 ### Revogação do `jti`
 

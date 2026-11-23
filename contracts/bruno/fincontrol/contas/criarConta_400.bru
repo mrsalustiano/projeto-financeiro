@@ -1,0 +1,24 @@
+﻿meta {
+  name: criarConta_400
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/contas
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  authorization: Bearer {{accessUsuario}}
+}
+
+body:json {
+{ "nome": "", "banco": "", "tipo": "CORRENTE", "saldoInicial": "abc", "dataSaldo": "2026-01-01" }
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(400);
+}

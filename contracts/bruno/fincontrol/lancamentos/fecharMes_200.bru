@@ -1,0 +1,19 @@
+meta {
+  name: fecharMes_200
+  type: http
+  seq: 45
+}
+
+post {
+  url: {{baseUrl}}/api/v1/meses/2025/6/fechamento
+  body: none
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessUsuario}}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(200);
+}

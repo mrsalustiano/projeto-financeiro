@@ -74,6 +74,7 @@ class AuthWebTest {
                 .andExpect(jsonPath("$.accessToken").value("jwt"))
                 .andExpect(jsonPath("$.tokenType").value("Bearer"))
                 .andExpect(jsonPath("$.expiresIn").value(900))
+                .andExpect(jsonPath("$.refreshToken").value("opaco"))
                 .andExpect(header().exists("Set-Cookie"));
     }
 
@@ -104,15 +105,47 @@ class AuthWebTest {
 
         mvc.perform(post("/api/v1/auth/refresh_token").cookie(new jakarta.servlet.http.Cookie("refresh_token", "opaco")))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").value("novo"));
-        mvc.perform(post("/api/v1/auth/logout").cookie(new jakarta.servlet.http.Cookie("refresh_token", "opaco")))
+                .andExpect(jsonPath("$.accessToken").value("novo"))
+                .andExpect(jsonPath("$.refreshToken").value("novo-opaco"));
+        mvc.perform(post("/api/v1/auth/logout"))
                 .andExpect(status().isNoContent());
-        verify(encerrar).executar(acesso, "opaco");
+        verify(encerrar).executar(acesso);
         mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/v1/auth/me"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.clienteId").value("42"))
                 .andExpect(jsonPath("$.role").value("ADMIN"))
                 .andExpect(jsonPath("$.senha").doesNotExist());
+    }
+
+    @Test
+    void logoutComBearerResponde204() throws Exception {
+        Acesso acesso = new Acesso("7", Papel.ADMIN, 42L, "jti", Instant.parse("2026-11-22T03:15:00Z"));
+        SecurityContextHolder.getContext().setAuthentication(
+                new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(acesso, null, java.util.List.of()));
+
+        mvc.perform(post("/api/v1/auth/logout"))
+                .andExpect(status().isNoContent())
+                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("Max-Age=0")));
+        verify(encerrar).executar(acesso);
+    }
+
+    @Test
+    void logoutSemBearerResponde401() throws Exception {
+        mvc.perform(post("/api/v1/auth/logout"))
+                .andExpect(status().isUnauthorized());
+        verify(encerrar, org.mockito.Mockito.never()).executar(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void refreshComHeaderXRefreshTokenTemPrecedenciaSobreOCookie() throws Exception {
+        when(renovar.executar("do-header")).thenReturn(new SessaoEmitida("novo", "novo-opaco"));
+
+        mvc.perform(post("/api/v1/auth/refresh_token")
+                        .header("X-Refresh-Token", "do-header")
+                        .cookie(new jakarta.servlet.http.Cookie("refresh_token", "do-cookie")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.refreshToken").value("novo-opaco"));
+        verify(renovar).executar("do-header");
     }
 
     @Test

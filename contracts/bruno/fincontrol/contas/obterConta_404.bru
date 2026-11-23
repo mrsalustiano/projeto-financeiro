@@ -1,0 +1,20 @@
+﻿meta {
+  name: obterConta_404
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/contas/99999999
+  body: none
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessUsuario}}
+}
+
+
+script:post-response {
+  expect(res.getStatus()).to.equal(404);
+}

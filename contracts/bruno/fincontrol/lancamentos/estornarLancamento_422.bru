@@ -1,0 +1,25 @@
+meta {
+  name: estornarLancamento_422
+  type: http
+  seq: 37
+}
+
+post {
+  url: {{baseUrl}}/api/v1/lancamentos/{{idLancamento}}/estorno
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  authorization: Bearer {{accessUsuario}}
+}
+
+body:json {
+{"motivo":"de novo"}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(422);
+  expect(res.getBody().codigoErro).to.equal('ESTORNO_REPETIDO');
+}

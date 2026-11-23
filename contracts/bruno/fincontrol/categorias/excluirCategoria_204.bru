@@ -1,0 +1,20 @@
+﻿meta {
+  name: excluirCategoria_204
+  type: http
+  seq: 1
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/categorias/{{idCategoria}}
+  body: none
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessUsuario}}
+}
+
+
+script:post-response {
+  expect(res.getStatus()).to.equal(204);
+}
