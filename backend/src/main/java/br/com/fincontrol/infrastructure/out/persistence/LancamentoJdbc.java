@@ -17,6 +17,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import br.com.fincontrol.domain.model.Dinheiro;
+import br.com.fincontrol.domain.model.Conciliacao;
 import br.com.fincontrol.domain.model.FiltroLancamento;
 import br.com.fincontrol.domain.model.Lancamento;
 import br.com.fincontrol.domain.model.Natureza;
@@ -122,6 +123,35 @@ public class LancamentoJdbc implements LancamentoRepositorio {
     }
 
     @Override
+    public List<Lancamento> sugerirPar(long clienteId, Lancamento alvo) {
+        return jdbc.query(
+                COLUNAS + """
+                 WHERE l.cliente_id = :clienteId
+                   AND l.conta_id = :contaId
+                   AND l.id <> :id
+                   AND l.valor = :valor
+                   AND l.natureza = :natureza
+                   AND l.estornado_em IS NULL
+                   AND ABS(DATEDIFF(l.data, :data)) <= :janela
+                   AND ((:temFitid = 1 AND l.fitid IS NULL) OR (:temFitid = 0 AND l.fitid IS NOT NULL))
+                   AND NOT EXISTS (SELECT 1 FROM conciliacao c
+                                   WHERE c.cliente_id = l.cliente_id
+                                     AND (c.lancamento_id = l.id OR c.extrato_id = l.id))
+                 ORDER BY ABS(DATEDIFF(l.data, :data)), l.id
+                """,
+                new MapSqlParameterSource()
+                        .addValue("clienteId", clienteId)
+                        .addValue("contaId", alvo.contaId())
+                        .addValue("id", alvo.id())
+                        .addValue("valor", alvo.valor().valor())
+                        .addValue("natureza", alvo.natureza().name())
+                        .addValue("data", java.sql.Date.valueOf(alvo.data()))
+                        .addValue("janela", Conciliacao.JANELA_DIAS)
+                        .addValue("temFitid", alvo.fitid() == null ? 0 : 1),
+                (rs, n) -> mapear(rs));
+    }
+
+    @Override
     public boolean existeFitid(long clienteId, long contaId, String fitid) {
         Integer total = jdbc.queryForObject(
                 """
@@ -161,10 +191,14 @@ public class LancamentoJdbc implements LancamentoRepositorio {
                 SELECT c.saldo_inicial,
                        COALESCE((SELECT SUM(l.valor) FROM lancamento l
                                  WHERE l.cliente_id = c.cliente_id AND l.conta_id = c.id
-                                   AND l.natureza = 'RECEITA' AND l.estornado_em IS NULL), 0) AS creditos,
+                                   AND l.natureza = 'RECEITA' AND l.estornado_em IS NULL
+                                   AND NOT EXISTS (SELECT 1 FROM conciliacao k
+                                                   WHERE k.cliente_id = l.cliente_id AND k.extrato_id = l.id)), 0) AS creditos,
                        COALESCE((SELECT SUM(l.valor) FROM lancamento l
                                  WHERE l.cliente_id = c.cliente_id AND l.conta_id = c.id
-                                   AND l.natureza = 'DESPESA' AND l.estornado_em IS NULL), 0) AS debitos,
+                                   AND l.natureza = 'DESPESA' AND l.estornado_em IS NULL
+                                   AND NOT EXISTS (SELECT 1 FROM conciliacao k
+                                                   WHERE k.cliente_id = l.cliente_id AND k.extrato_id = l.id)), 0) AS debitos,
                        COALESCE((SELECT SUM(t.valor) FROM transferencia t
                                  WHERE t.cliente_id = c.cliente_id AND t.conta_destino_id = c.id), 0) AS entradas,
                        COALESCE((SELECT SUM(t.valor) FROM transferencia t

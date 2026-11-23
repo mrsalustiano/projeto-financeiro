@@ -1,0 +1,14 @@
+meta {
+  name: desfazerConciliacao_401
+  type: http
+  seq: 14
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/conciliacoes/{{idConciliacao}}
+  auth: none
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(401);
+}

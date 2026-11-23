@@ -8,10 +8,15 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import br.com.fincontrol.domain.service.AcessoNegadoException;
 import br.com.fincontrol.domain.service.ArquivoNaoOfxException;
+import br.com.fincontrol.domain.service.ComprovanteGrandeException;
+import br.com.fincontrol.domain.service.ComprovanteTipoInvalidoException;
+import br.com.fincontrol.domain.service.ConciliacaoInvalidaException;
+import br.com.fincontrol.domain.service.ConciliacaoRepetidaException;
 import br.com.fincontrol.domain.service.EmailEmUsoException;
 import br.com.fincontrol.domain.service.EstornoRepetidoException;
 import br.com.fincontrol.domain.service.IdempotenciaConflitoException;
@@ -170,6 +175,46 @@ public class ApiExceptionHandler {
                 "Recorrência já está no estado pedido.",
                 req,
                 ErroCodigo.RECORRENCIA_INATIVA);
+    }
+
+    @ExceptionHandler(ConciliacaoInvalidaException.class)
+    ProblemDetail conciliacaoInvalida(HttpServletRequest req) {
+        return Problemas.de(
+                HttpStatus.valueOf(422),
+                "Conciliação inválida",
+                "Lançamento e extrato devem ser da mesma conta, mesmo valor e até 5 dias.",
+                req,
+                ErroCodigo.CONCILIACAO_INVALIDA);
+    }
+
+    @ExceptionHandler(ConciliacaoRepetidaException.class)
+    ProblemDetail conciliacaoRepetida(HttpServletRequest req) {
+        return Problemas.de(
+                HttpStatus.valueOf(422),
+                "Conciliação repetida",
+                "Lançamento ou extrato já conciliado.",
+                req,
+                ErroCodigo.CONCILIACAO_REPETIDA);
+    }
+
+    @ExceptionHandler({ComprovanteGrandeException.class, MaxUploadSizeExceededException.class})
+    ProblemDetail comprovanteGrande(HttpServletRequest req) {
+        return Problemas.de(
+                HttpStatus.PAYLOAD_TOO_LARGE,
+                "Comprovante grande",
+                "O comprovante deve ter até 1 MB.",
+                req,
+                ErroCodigo.COMPROVANTE_GRANDE);
+    }
+
+    @ExceptionHandler(ComprovanteTipoInvalidoException.class)
+    ProblemDetail comprovanteTipoInvalido(HttpServletRequest req) {
+        return Problemas.de(
+                HttpStatus.valueOf(422),
+                "Comprovante inválido",
+                "Envie um comprovante PNG, JPEG ou PDF.",
+                req,
+                ErroCodigo.COMPROVANTE_TIPO_INVALIDO);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

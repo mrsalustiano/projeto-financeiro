@@ -1,0 +1,14 @@
+meta {
+  name: excluirComprovante_401
+  type: http
+  seq: 34
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/comprovantes/{{idComprovante}}
+  auth: none
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(401);
+}

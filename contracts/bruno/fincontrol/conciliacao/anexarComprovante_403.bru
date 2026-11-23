@@ -1,0 +1,23 @@
+meta {
+  name: anexarComprovante_403
+  type: http
+  seq: 20
+}
+
+post {
+  url: {{baseUrl}}/api/v1/lancamentos/{{idLancamento}}/comprovantes
+  body: multipart-form
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessMaster}}
+}
+
+body:multipart-form {
+  arquivo: @file(../../../comprovantes/recibo.png)
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(403);
+}

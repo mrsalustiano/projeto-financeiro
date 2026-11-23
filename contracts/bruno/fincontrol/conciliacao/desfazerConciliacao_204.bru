@@ -1,0 +1,18 @@
+meta {
+  name: desfazerConciliacao_204
+  type: http
+  seq: 13
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/conciliacoes/{{idConciliacao}}
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessUsuario}}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(204);
+}

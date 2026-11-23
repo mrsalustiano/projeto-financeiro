@@ -22,6 +22,8 @@ public interface LancamentoRepositorio {
 
     List<Lancamento> listarPorParcela(long clienteId, long parcelaId);
 
+    List<Lancamento> sugerirPar(long clienteId, Lancamento alvo);
+
     boolean existeFitid(long clienteId, long contaId, String fitid);
 
     void atualizar(Lancamento lancamento);
