@@ -48,8 +48,8 @@ public class OrcamentoJdbc implements OrcamentoRepositorio {
         jdbc.update(
                 """
                 INSERT INTO orcamento (cliente_id, categoria_id, ano, mes, limite)
-                VALUES (:clienteId, :categoriaId, :ano, :mes, :limite)
-                ON DUPLICATE KEY UPDATE limite = VALUES(limite)
+                VALUES (:clienteId, :categoriaId, :ano, :mes, :limite) AS novo
+                ON DUPLICATE KEY UPDATE limite = novo.limite
                 """,
                 new MapSqlParameterSource()
                         .addValue("clienteId", orcamento.clienteId())

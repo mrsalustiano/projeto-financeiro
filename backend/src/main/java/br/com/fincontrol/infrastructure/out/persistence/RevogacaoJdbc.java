@@ -22,8 +22,8 @@ public class RevogacaoJdbc implements RevogacaoRepositorio {
     public void revogar(String jti, Instant expiraEm) {
         jdbc.update(
                 """
-                INSERT INTO access_token_revogado (jti, expira_em) VALUES (:jti, :expira)
-                ON DUPLICATE KEY UPDATE expira_em = VALUES(expira_em)
+                INSERT INTO access_token_revogado (jti, expira_em) VALUES (:jti, :expira) AS novo
+                ON DUPLICATE KEY UPDATE expira_em = novo.expira_em
                 """,
                 new MapSqlParameterSource()
                         .addValue("jti", jti)
