@@ -1,0 +1,18 @@
+meta {
+  name: listarComprovantes_403
+  type: http
+  seq: 27
+}
+
+get {
+  url: {{baseUrl}}/api/v1/lancamentos/{{idLancamento}}/comprovantes
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessMaster}}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(403);
+}

@@ -1,0 +1,14 @@
+meta {
+  name: listarComprovantes_401
+  type: http
+  seq: 26
+}
+
+get {
+  url: {{baseUrl}}/api/v1/lancamentos/{{idLancamento}}/comprovantes
+  auth: none
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(401);
+}

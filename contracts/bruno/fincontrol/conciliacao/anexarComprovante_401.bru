@@ -1,0 +1,19 @@
+meta {
+  name: anexarComprovante_401
+  type: http
+  seq: 19
+}
+
+post {
+  url: {{baseUrl}}/api/v1/lancamentos/{{idLancamento}}/comprovantes
+  body: multipart-form
+  auth: none
+}
+
+body:multipart-form {
+  arquivo: @file(../../../comprovantes/recibo.png)
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(401);
+}

@@ -56,6 +56,10 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aspectj</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jdbc</artifactId>
         </dependency>
         <dependency>
@@ -317,6 +321,48 @@
                             <inputSpec>${project.basedir}/src/main/resources/openapi/ofx.yaml</inputSpec>
                             <generatorName>spring</generatorName>
                             <output>${project.build.directory}/generated-sources/openapi-ofx</output>
+                            <apiPackage>br.com.fincontrol.infrastructure.in.web.api</apiPackage>
+                            <modelPackage>br.com.fincontrol.infrastructure.in.web.api.model</modelPackage>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <configOptions>
+                                <interfaceOnly>true</interfaceOnly>
+                                <useSpringBoot3>true</useSpringBoot3>
+                                <useTags>true</useTags>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                                <openApiNullable>false</openApiNullable>
+                                <documentationProvider>none</documentationProvider>
+                                <useBeanValidation>true</useBeanValidation>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>conciliacao</id>
+                        <goals><goal>generate</goal></goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/openapi/conciliacao.yaml</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <output>${project.build.directory}/generated-sources/openapi-conciliacao</output>
+                            <apiPackage>br.com.fincontrol.infrastructure.in.web.api</apiPackage>
+                            <modelPackage>br.com.fincontrol.infrastructure.in.web.api.model</modelPackage>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <configOptions>
+                                <interfaceOnly>true</interfaceOnly>
+                                <useSpringBoot3>true</useSpringBoot3>
+                                <useTags>true</useTags>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                                <openApiNullable>false</openApiNullable>
+                                <documentationProvider>none</documentationProvider>
+                                <useBeanValidation>true</useBeanValidation>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>auditoria</id>
+                        <goals><goal>generate</goal></goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/openapi/auditoria.yaml</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <output>${project.build.directory}/generated-sources/openapi-auditoria</output>
                             <apiPackage>br.com.fincontrol.infrastructure.in.web.api</apiPackage>
                             <modelPackage>br.com.fincontrol.infrastructure.in.web.api.model</modelPackage>
                             <generateSupportingFiles>false</generateSupportingFiles>

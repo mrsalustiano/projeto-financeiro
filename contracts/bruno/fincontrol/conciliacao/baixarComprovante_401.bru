@@ -1,0 +1,14 @@
+meta {
+  name: baixarComprovante_401
+  type: http
+  seq: 30
+}
+
+get {
+  url: {{baseUrl}}/api/v1/comprovantes/{{idComprovante}}
+  auth: none
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(401);
+}

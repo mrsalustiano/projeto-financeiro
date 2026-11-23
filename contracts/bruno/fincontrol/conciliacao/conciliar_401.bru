@@ -1,0 +1,23 @@
+meta {
+  name: conciliar_401
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/api/v1/conciliacoes
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  {"lancamentoId":"{{idLancamento}}","extratoId":"{{idExtrato}}"}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(401);
+}

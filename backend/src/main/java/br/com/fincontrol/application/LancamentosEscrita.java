@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.fincontrol.domain.model.Acesso;
+import br.com.fincontrol.domain.model.AcaoAuditoria;
 import br.com.fincontrol.domain.model.Lancamento;
 import br.com.fincontrol.domain.model.ParcelaPlanejada;
 import br.com.fincontrol.domain.model.Parcelamento;
@@ -54,6 +55,7 @@ public class LancamentosEscrita {
     }
 
     @Transactional
+    @Auditavel(acao = AcaoAuditoria.CREATE, recurso = "lancamento")
     public List<Lancamento> criar(Acesso acesso, String chave, ComandoLancamento comando) {
         long clienteId = EscopoTenant.escrita(acesso);
         String hash = hashDe(chave, comando);
@@ -71,6 +73,7 @@ public class LancamentosEscrita {
     }
 
     @Transactional
+    @Auditavel(acao = AcaoAuditoria.UPDATE, recurso = "lancamento")
     public Lancamento editar(Acesso acesso, long id, ComandoLancamento comando) {
         long clienteId = EscopoTenant.escrita(acesso);
         Lancamento atual = lancamentos.buscar(clienteId, id).orElseThrow(NaoEncontradoException::new);
@@ -82,11 +85,13 @@ public class LancamentosEscrita {
         exigirVinculos(clienteId, comando.contaId(), comando.categoriaId());
         Lancamento novo = atual.editar(comando.contaId(), comando.categoriaId(), comando.natureza(),
                 comando.tipoDespesa(), comando.valor(), comando.data(), comando.descricao());
+        ContextoAuditoria.antes(atual);
         lancamentos.atualizar(novo);
         return novo;
     }
 
     @Transactional
+    @Auditavel(acao = AcaoAuditoria.UPDATE, recurso = "lancamento")
     public Lancamento estornar(Acesso acesso, long id, String motivo) {
         long clienteId = EscopoTenant.escrita(acesso);
         Lancamento atual = lancamentos.buscar(clienteId, id).orElseThrow(NaoEncontradoException::new);
@@ -95,11 +100,13 @@ public class LancamentosEscrita {
         }
         exigirMesAberto(clienteId, atual.data());
         Lancamento estornado = atual.estornar(motivo, acesso.usuarioId(), relogio.agora());
+        ContextoAuditoria.antes(atual);
         lancamentos.atualizar(estornado);
         return estornado;
     }
 
     @Transactional
+    @Auditavel(acao = AcaoAuditoria.DELETE, recurso = "lancamento")
     public void excluir(Acesso acesso, long id) {
         long clienteId = EscopoTenant.escrita(acesso);
         Lancamento atual = lancamentos.buscar(clienteId, id).orElseThrow(NaoEncontradoException::new);
@@ -107,6 +114,7 @@ public class LancamentosEscrita {
             throw new LancamentoEstornadoException();
         }
         exigirMesAberto(clienteId, atual.data());
+        ContextoAuditoria.antes(atual);
         if (!lancamentos.excluir(clienteId, id)) {
             throw new NaoEncontradoException();
         }

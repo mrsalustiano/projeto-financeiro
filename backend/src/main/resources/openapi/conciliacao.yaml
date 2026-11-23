@@ -1,0 +1,274 @@
+openapi: 3.0.3
+info:
+  title: FinControl Conciliação
+  version: 0.6.0
+paths:
+  /api/v1/conciliacoes/sugestoes:
+    get:
+      operationId: sugerirConciliacao
+      tags: [conciliacao]
+      security:
+        - bearer: []
+      parameters:
+        - name: lancamentoId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Candidatos a par na mesma conta, mesmo valor e até 5 dias
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LancamentoConciliacao'
+        '400':
+          description: Identificador ausente ou inválido
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lançamento não encontrado
+  /api/v1/conciliacoes:
+    post:
+      operationId: conciliar
+      tags: [conciliacao]
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConciliacaoRequest'
+      responses:
+        '201':
+          description: Conciliação gravada nos dois lados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConciliacaoResponse'
+        '400':
+          description: Corpo inválido
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lançamento ou extrato não encontrado
+        '409':
+          description: Mês fechado para escrita
+        '422':
+          description: Par inválido ou já conciliado
+  /api/v1/conciliacoes/{id}:
+    delete:
+      operationId: desfazerConciliacao
+      tags: [conciliacao]
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Conciliação desfeita nos dois lados
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Conciliação não encontrada
+  /api/v1/lancamentos/{lancamentoId}/comprovantes:
+    post:
+      operationId: anexarComprovante
+      tags: [comprovantes]
+      security:
+        - bearer: []
+      parameters:
+        - name: lancamentoId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [arquivo]
+              properties:
+                arquivo:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Comprovante gravado fora do banco
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComprovanteResponse'
+        '400':
+          description: Arquivo ausente
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lançamento não encontrado
+        '409':
+          description: Mês fechado para escrita
+        '413':
+          description: Arquivo acima de 1 MB
+        '422':
+          description: Formato diferente de PNG, JPEG ou PDF
+    get:
+      operationId: listarComprovantes
+      tags: [comprovantes]
+      security:
+        - bearer: []
+      parameters:
+        - name: lancamentoId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Comprovantes do lançamento
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ComprovanteResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lançamento não encontrado
+  /api/v1/comprovantes/{id}:
+    get:
+      operationId: baixarComprovante
+      tags: [comprovantes]
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Conteúdo binário do comprovante
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Comprovante não encontrado
+    delete:
+      operationId: excluirComprovante
+      tags: [comprovantes]
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Comprovante removido do banco e do armazenamento
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '404':
+          description: Comprovante não encontrado
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    LancamentoConciliacao:
+      type: object
+      required: [id, data, descricao, valor, natureza]
+      properties:
+        id:
+          type: string
+        data:
+          type: string
+          format: date
+        descricao:
+          type: string
+        valor:
+          type: string
+        natureza:
+          type: string
+          enum: [RECEITA, DESPESA]
+        fitid:
+          type: string
+          nullable: true
+    ConciliacaoRequest:
+      type: object
+      required: [lancamentoId, extratoId]
+      properties:
+        lancamentoId:
+          type: string
+        extratoId:
+          type: string
+    ConciliacaoResponse:
+      type: object
+      required: [id, contaId, lancamentoId, extratoId, conciliadoEm, conciliadoPor]
+      properties:
+        id:
+          type: string
+        contaId:
+          type: string
+        lancamentoId:
+          type: string
+        extratoId:
+          type: string
+        conciliadoEm:
+          type: string
+          format: date-time
+        conciliadoPor:
+          type: string
+    ComprovanteResponse:
+      type: object
+      required: [id, lancamentoId, nomeArquivo, tipo, tamanho, criadoEm, criadoPor]
+      properties:
+        id:
+          type: string
+        lancamentoId:
+          type: string
+        nomeArquivo:
+          type: string
+        tipo:
+          type: string
+          enum: [PNG, JPEG, PDF]
+        tamanho:
+          type: integer
+          format: int64
+        criadoEm:
+          type: string
+          format: date-time
+        criadoPor:
+          type: string

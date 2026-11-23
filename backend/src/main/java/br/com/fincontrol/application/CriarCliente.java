@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.fincontrol.domain.model.Emails;
+import br.com.fincontrol.domain.model.AcaoAuditoria;
 import br.com.fincontrol.domain.model.NovoUsuario;
 import br.com.fincontrol.domain.model.Papel;
 import br.com.fincontrol.domain.service.ClienteRepositorio;
@@ -31,6 +32,7 @@ public class CriarCliente {
     }
 
     @Transactional
+    @Auditavel(acao = AcaoAuditoria.CREATE, recurso = "cliente")
     public ClienteCriado executar(String nomeCliente, String nomeAdministrador, String email, String senha) {
         String normalizado = Emails.normalizar(email);
         if (usuarios.emailExiste(normalizado)) {

@@ -1,0 +1,18 @@
+meta {
+  name: desfazerConciliacao_404
+  type: http
+  seq: 16
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/conciliacoes/999999
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessUsuario}}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(404);
+}
