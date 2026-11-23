@@ -66,7 +66,7 @@ Contrato `auth.yaml` e `master.yaml`. Rotas:
 
 JWT RS256 em `infrastructure/out/security`. Chaves só em `JWT_PRIVATE_KEY_PEM` e `JWT_PUBLIC_KEY_PEM`. Claims e nenhuma outra: `iss=fincontrol`, `sub` (id do usuário), `role` (`MASTER`, `ADMIN`, `COLABORADOR`, `LEITOR`), `clienteId` (ausente no Master), `jti` (UUID novo a cada emissão), `iat`, `nbf`, `exp` (+15 min). O filtro cria uma autoridade `ROLE_<role>`.
 
-Refresh não é JWT: 256 bits, hash SHA-256, cookie `refresh_token` `HttpOnly` `Secure` `SameSite=Strict`, path `/api/v1/auth`, 7 dias. Corpo do login e do refresh: `accessToken`, `tokenType`, `expiresIn` (900). Logout revoga o cookie e grava o `jti` em `access_token_revogado` até o `exp`. Refresh gira o cookie, emite outro `jti` e revoga o access anterior.
+Refresh não é JWT: 256 bits, hash SHA-256, devolvido no corpo e aceito no header `X-Refresh-Token` (precedência) ou no cookie `refresh_token` `HttpOnly` `Secure` `SameSite=Strict`, path `/api/v1/auth`, 7 dias. Corpo do login e do refresh: `accessToken`, `tokenType`, `expiresIn` (900) e `refreshToken`. Logout e `/me` exigem só `Authorization: Bearer`; o logout revoga o refresh do `jti` atual e grava o `jti` em `access_token_revogado` até o `exp`, e sem Bearer responde 401. Refresh gira o valor, emite outro `jti` e revoga o access anterior. No Swagger, o botão Authorize de cada spec cola o accessToken no esquema `bearer`.
 
 Master cria cliente e o primeiro administrador. Dois clientes de prova, cada um com o próprio e-mail. Senha Argon2id. Login inválido, e-mail inexistente, usuário ou cliente inativo: o mesmo 401 `NAO_AUTENTICADO`. Após várias falhas, 429 `LOGIN_BLOQUEADO`.
 

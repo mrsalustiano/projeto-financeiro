@@ -25,6 +25,8 @@ script:post-response {
   expect(p.role).to.equal('ADMIN');
   expect(p.clienteId).to.be.a('string');
   expect(p.exp - p.iat).to.equal(900);
+  expect(res.getBody().refreshToken).to.be.a('string');
   bru.setVar('accessUsuario', res.getBody().accessToken);
   bru.setVar('clienteUsuario', p.clienteId);
+  bru.setVar('refreshUsuario', res.getBody().refreshToken);
 }

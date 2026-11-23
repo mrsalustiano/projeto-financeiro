@@ -221,7 +221,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "const b = pm.response.json(); const p = JSON.parse(atob(b.accessToken.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); const cookie = pm.response.headers.get('Set-Cookie'); pm.test('200', () => { pm.response.to.have.status(200); pm.expect(p.role).to.eql('ADMIN'); pm.expect(p.clienteId).to.be.a('string'); pm.expect(p.iss).to.eql('fincontrol'); pm.expect(p.exp - p.iat).to.eql(900); pm.expect(cookie).to.include('HttpOnly'); pm.expect(cookie).to.include('SameSite=Strict'); pm.expect(cookie).to.include('Path=/api/v1/auth'); pm.environment.set('accessUsuario', b.accessToken); pm.environment.set('subUsuario', p.sub); pm.environment.set('clienteUsuario', p.clienteId); pm.environment.set('refreshUsuario', cookie.split(';')[0].substring('refresh_token='.length)); });"
+                  "const b = pm.response.json(); const p = JSON.parse(atob(b.accessToken.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); const cookie = pm.response.headers.get('Set-Cookie'); pm.test('200', () => { pm.response.to.have.status(200); pm.expect(p.role).to.eql('ADMIN'); pm.expect(p.clienteId).to.be.a('string'); pm.expect(p.iss).to.eql('fincontrol'); pm.expect(p.exp - p.iat).to.eql(900); pm.expect(b.refreshToken).to.be.a('string'); pm.expect(cookie).to.include('refresh_token=' + b.refreshToken); pm.expect(cookie).to.include('HttpOnly'); pm.expect(cookie).to.include('SameSite=Strict'); pm.expect(cookie).to.include('Path=/api/v1/auth'); pm.environment.set('accessUsuario', b.accessToken); pm.environment.set('subUsuario', p.sub); pm.environment.set('clienteUsuario', p.clienteId); pm.environment.set('refreshUsuario', b.refreshToken); });"
                 ]
               }
             }
@@ -455,8 +455,8 @@
             "method": "POST",
             "header": [
               {
-                "key": "Cookie",
-                "value": "refresh_token={{refreshUsuario}}"
+                "key": "X-Refresh-Token",
+                "value": "{{refreshUsuario}}"
               }
             ],
             "url": "{{baseUrl}}/api/v1/auth/refresh_token"
@@ -467,7 +467,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "const b = pm.response.json(); const p = JSON.parse(atob(b.accessToken.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); const antigo = JSON.parse(atob(pm.environment.get('accessUsuario').split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); const cookie = pm.response.headers.get('Set-Cookie'); pm.test('200', () => { pm.response.to.have.status(200); pm.expect(p.jti).to.not.eql(antigo.jti); pm.expect(p.sub).to.eql(antigo.sub); pm.environment.set('accessAntigo', pm.environment.get('accessUsuario')); pm.environment.set('refreshAntigo', pm.environment.get('refreshUsuario')); pm.environment.set('accessUsuario', b.accessToken); pm.environment.set('refreshUsuario', cookie.split(';')[0].substring('refresh_token='.length)); });"
+                  "const b = pm.response.json(); const p = JSON.parse(atob(b.accessToken.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); const antigo = JSON.parse(atob(pm.environment.get('accessUsuario').split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); const cookie = pm.response.headers.get('Set-Cookie'); pm.test('200', () => { pm.response.to.have.status(200); pm.expect(p.jti).to.not.eql(antigo.jti); pm.expect(p.sub).to.eql(antigo.sub); pm.expect(b.refreshToken).to.be.a('string'); pm.expect(b.refreshToken).to.not.eql(pm.environment.get('refreshUsuario')); pm.expect(cookie).to.include('refresh_token=' + b.refreshToken); pm.environment.set('accessAntigo', pm.environment.get('accessUsuario')); pm.environment.set('refreshAntigo', pm.environment.get('refreshUsuario')); pm.environment.set('accessUsuario', b.accessToken); pm.environment.set('refreshUsuario', b.refreshToken); });"
                 ]
               }
             }
@@ -589,10 +589,6 @@
               {
                 "key": "Authorization",
                 "value": "Bearer {{accessUsuario}}"
-              },
-              {
-                "key": "Cookie",
-                "value": "refresh_token={{refreshUsuario}}"
               }
             ],
             "url": "{{baseUrl}}/api/v1/auth/logout"
@@ -613,12 +609,7 @@
           "name": "refreshToken_401_ausente",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Cookie",
-                "value": "refresh_token={{refreshUsuario}}"
-              }
-            ],
+            "header": [],
             "url": "{{baseUrl}}/api/v1/auth/refresh_token"
           },
           "event": [

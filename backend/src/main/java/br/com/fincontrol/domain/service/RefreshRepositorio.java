@@ -12,4 +12,6 @@ public interface RefreshRepositorio {
     void inserir(long usuarioId, String hash, Instant expiraEm, String jtiAccess, Instant accessExpiraEm);
 
     void revogar(long id);
+
+    void revogarPorJtiAccess(String jtiAccess);
 }

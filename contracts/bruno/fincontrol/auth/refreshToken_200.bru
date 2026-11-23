@@ -12,7 +12,7 @@ post {
 
 headers {
   content-type: application/json
-  cookie: refresh_token={{refreshUsuario}}
+  x-refresh-token: {{refreshUsuario}}
 }
 
 
@@ -20,7 +20,10 @@ script:post-response {
   expect(res.getStatus()).to.equal(200);
   const p = JSON.parse(Buffer.from(res.getBody().accessToken.split('.')[1], 'base64url').toString());
   expect(p.jti).to.be.a('string');
+  expect(res.getBody().refreshToken).to.be.a('string');
+  expect(res.getBody().refreshToken).to.not.equal(bru.getVar('refreshUsuario'));
   bru.setVar('accessAntigo', bru.getVar('accessUsuario'));
   bru.setVar('refreshAntigo', bru.getVar('refreshUsuario'));
   bru.setVar('accessUsuario', res.getBody().accessToken);
+  bru.setVar('refreshUsuario', res.getBody().refreshToken);
 }

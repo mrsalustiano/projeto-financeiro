@@ -58,4 +58,11 @@ public class RefreshJdbc implements RefreshRepositorio {
     public void revogar(long id) {
         jdbc.update("UPDATE refresh_token SET revogado = 1 WHERE id = :id", Map.of("id", id));
     }
+
+    @Override
+    public void revogarPorJtiAccess(String jtiAccess) {
+        jdbc.update(
+                "UPDATE refresh_token SET revogado = 1 WHERE jti_access = :jti AND revogado = 0",
+                Map.of("jti", jtiAccess));
+    }
 }

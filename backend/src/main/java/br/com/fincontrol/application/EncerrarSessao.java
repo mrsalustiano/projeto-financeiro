@@ -5,7 +5,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.com.fincontrol.domain.model.Acesso;
 import br.com.fincontrol.domain.service.NaoAutenticadoException;
-import br.com.fincontrol.domain.service.RefreshOpacoPort;
 import br.com.fincontrol.domain.service.RefreshRepositorio;
 import br.com.fincontrol.domain.service.RevogacaoRepositorio;
 
@@ -13,31 +12,19 @@ import br.com.fincontrol.domain.service.RevogacaoRepositorio;
 public class EncerrarSessao {
 
     private final RefreshRepositorio refreshRepositorio;
-    private final RefreshOpacoPort refresh;
     private final RevogacaoRepositorio revogacao;
 
-    public EncerrarSessao(
-            RefreshRepositorio refreshRepositorio,
-            RefreshOpacoPort refresh,
-            RevogacaoRepositorio revogacao) {
+    public EncerrarSessao(RefreshRepositorio refreshRepositorio, RevogacaoRepositorio revogacao) {
         this.refreshRepositorio = refreshRepositorio;
-        this.refresh = refresh;
         this.revogacao = revogacao;
     }
 
     @Transactional
-    public void executar(Acesso acesso, String opaco) {
+    public void executar(Acesso acesso) {
         if (acesso == null) {
             throw new NaoAutenticadoException();
         }
-        revogarRefresh(opaco);
+        refreshRepositorio.revogarPorJtiAccess(acesso.jti());
         revogacao.revogar(acesso.jti(), acesso.expiraEm());
-    }
-
-    private void revogarRefresh(String opaco) {
-        if (opaco == null || opaco.isBlank()) {
-            return;
-        }
-        refreshRepositorio.buscarPorHash(refresh.hash(opaco)).ifPresent(guardado -> refreshRepositorio.revogar(guardado.id()));
     }
 }
