@@ -33,6 +33,7 @@ import br.com.fincontrol.domain.service.ParcelaInvalidaException;
 import br.com.fincontrol.domain.service.RecorrenciaInativaException;
 import br.com.fincontrol.domain.service.TransferenciaInvalidaException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
@@ -224,6 +225,11 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler({MissingServletRequestPartException.class, MissingServletRequestParameterException.class})
     ProblemDetail parteAusente(HttpServletRequest req) {
+        return Problemas.de(HttpStatus.BAD_REQUEST, "Dados inválidos", "Revise os campos informados.", req, ErroCodigo.VALIDACAO);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    ProblemDetail restricaoViolada(HttpServletRequest req) {
         return Problemas.de(HttpStatus.BAD_REQUEST, "Dados inválidos", "Revise os campos informados.", req, ErroCodigo.VALIDACAO);
     }
 

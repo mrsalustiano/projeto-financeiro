@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.fincontrol.domain.model.Acesso;
+import br.com.fincontrol.domain.model.AcaoAuditoria;
 import br.com.fincontrol.domain.model.Conciliacao;
 import br.com.fincontrol.domain.model.Lancamento;
 import br.com.fincontrol.domain.service.ConciliacaoInvalidaException;
@@ -45,6 +46,7 @@ public class Conciliacoes {
     }
 
     @Transactional
+    @Auditavel(acao = AcaoAuditoria.CREATE, recurso = "conciliacao")
     public Conciliacao conciliar(Acesso acesso, long lancamentoId, long extratoId) {
         long clienteId = EscopoTenant.escrita(acesso);
         Lancamento lancamento = lancamentos.buscar(clienteId, lancamentoId).orElseThrow(NaoEncontradoException::new);
@@ -62,10 +64,12 @@ public class Conciliacoes {
     }
 
     @Transactional
+    @Auditavel(acao = AcaoAuditoria.DELETE, recurso = "conciliacao")
     public void desfazer(Acesso acesso, long id) {
         long clienteId = EscopoTenant.escrita(acesso);
         Conciliacao atual = conciliacoes.buscar(clienteId, id).orElseThrow(NaoEncontradoException::new);
         exigirMesAberto(clienteId, atual);
+        ContextoAuditoria.antes(atual);
         if (!conciliacoes.excluir(clienteId, id)) {
             throw new NaoEncontradoException();
         }

@@ -20,7 +20,8 @@ class ArchitectureTest {
             .adapter("persistence", "br.com.fincontrol.infrastructure.out.persistence..")
             .adapter("security", "br.com.fincontrol.infrastructure.out.security..")
             .adapter("external", "br.com.fincontrol.infrastructure.out.external..")
-            .adapter("storage", "br.com.fincontrol.infrastructure.out.storage..");
+            .adapter("storage", "br.com.fincontrol.infrastructure.out.storage..")
+            .adapter("auditoria", "br.com.fincontrol.infrastructure.out.auditoria..");
 
     @ArchTest
     static final ArchRule dominioSemFramework = noClasses()

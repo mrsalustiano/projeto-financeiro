@@ -106,6 +106,7 @@ class ContasUseCasesTest {
                 CASA, "Reserva", "Nubank", TipoConta.POUPANCA, Saldo.zero(), LocalDate.of(2026, 11, 22), null);
         assertThat(criada.id()).isEqualTo(15L);
         when(contas.excluir(42L, 15L)).thenReturn(true);
+        when(contas.buscar(42L, 15L)).thenReturn(Optional.of(criada));
         new ContasEscrita(contas).excluir(CASA, 15L);
         when(contas.listar(42L)).thenReturn(List.of(criada));
         assertThat(new ContasConsulta(contas).listar(CASA)).hasSize(1);

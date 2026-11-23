@@ -1,0 +1,19 @@
+meta {
+  name: listarAuditoria_400
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/v1/master/auditoria?cursor=x
+  body: none
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{accessMaster}}
+}
+
+script:post-response {
+  expect(res.getStatus()).to.equal(400);
+}

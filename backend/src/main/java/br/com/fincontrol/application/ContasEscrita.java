@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.fincontrol.domain.model.Acesso;
+import br.com.fincontrol.domain.model.AcaoAuditoria;
 import br.com.fincontrol.domain.model.Conta;
 import br.com.fincontrol.domain.model.Dinheiro;
 import br.com.fincontrol.domain.model.Saldo;
@@ -26,6 +27,7 @@ public class ContasEscrita {
     }
 
     @Transactional
+    @Auditavel(acao = AcaoAuditoria.CREATE, recurso = "conta")
     public Conta criar(Acesso acesso, String nome, String banco, TipoConta tipo, Saldo saldo, LocalDate data, Dinheiro limite) {
         long clienteId = EscopoTenant.escrita(acesso);
         Conta nova = montar(0L, clienteId, nome, banco, tipo, saldo, data, limite);
@@ -35,6 +37,7 @@ public class ContasEscrita {
     }
 
     @Transactional
+    @Auditavel(acao = AcaoAuditoria.UPDATE, recurso = "conta")
     public Conta atualizar(Acesso acesso, long id, String nome, String banco, TipoConta tipo, Saldo saldo, LocalDate data, Dinheiro limite) {
         long clienteId = EscopoTenant.escrita(acesso);
         Conta atual = contas.buscar(clienteId, id).orElseThrow(NaoEncontradoException::new);
@@ -42,13 +45,17 @@ public class ContasEscrita {
         if (!atual.nome().equals(nova.nome())) {
             exigirNomeLivre(clienteId, nova.nome());
         }
+        ContextoAuditoria.antes(atual);
         contas.atualizar(nova);
         return nova;
     }
 
     @Transactional
+    @Auditavel(acao = AcaoAuditoria.DELETE, recurso = "conta")
     public void excluir(Acesso acesso, long id) {
         long clienteId = EscopoTenant.escrita(acesso);
+        Conta atual = contas.buscar(clienteId, id).orElseThrow(NaoEncontradoException::new);
+        ContextoAuditoria.antes(atual);
         if (!contas.excluir(clienteId, id)) {
             throw new NaoEncontradoException();
         }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.fincontrol.domain.model.Acesso;
+import br.com.fincontrol.domain.model.AcaoAuditoria;
 import br.com.fincontrol.domain.model.Comprovante;
 import br.com.fincontrol.domain.model.Lancamento;
 import br.com.fincontrol.domain.model.TipoComprovante;
@@ -56,6 +57,7 @@ public class Comprovantes {
     }
 
     @Transactional
+    @Auditavel(acao = AcaoAuditoria.CREATE, recurso = "comprovante")
     public Comprovante anexar(Acesso acesso, long lancamentoId, String nomeArquivo, byte[] conteudo) {
         long clienteId = EscopoTenant.escrita(acesso);
         Lancamento lancamento = exigirLancamento(clienteId, lancamentoId);
@@ -77,9 +79,11 @@ public class Comprovantes {
     }
 
     @Transactional
+    @Auditavel(acao = AcaoAuditoria.DELETE, recurso = "comprovante")
     public void remover(Acesso acesso, long id) {
         long clienteId = EscopoTenant.escrita(acesso);
         Comprovante comprovante = comprovantes.buscar(clienteId, id).orElseThrow(NaoEncontradoException::new);
+        ContextoAuditoria.antes(comprovante);
         if (!comprovantes.excluir(clienteId, id)) {
             throw new NaoEncontradoException();
         }

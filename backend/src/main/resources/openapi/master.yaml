@@ -30,6 +30,67 @@ paths:
           description: Acesso negado
         '422':
           description: E-mail já cadastrado
+  /api/v1/master/auditoria:
+    get:
+      operationId: listarAuditoria
+      tags: [master]
+      security:
+        - bearer: []
+      parameters:
+        - name: clienteId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: recurso
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: acao
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [CREATE, UPDATE, DELETE]
+        - name: de
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: ate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limite
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Trilha de auditoria paginada por cursor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginaAuditoriaResponse'
+        '400':
+          description: Filtro ou cursor inválido
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
 components:
   securitySchemes:
     bearer:
@@ -61,3 +122,49 @@ components:
           type: string
         administradorId:
           type: string
+    PaginaAuditoriaResponse:
+      type: object
+      required: [itens]
+      properties:
+        itens:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditoriaResponse'
+        proximoCursor:
+          type: string
+          nullable: true
+    AuditoriaResponse:
+      type: object
+      required: [id, acao, recurso, criadoEm]
+      properties:
+        id:
+          type: string
+        clienteId:
+          type: string
+          nullable: true
+        usuarioId:
+          type: string
+          nullable: true
+        usuarioEmail:
+          type: string
+          nullable: true
+        usuarioPerfil:
+          type: string
+          nullable: true
+        acao:
+          type: string
+          enum: [CREATE, UPDATE, DELETE]
+        recurso:
+          type: string
+        recursoId:
+          type: string
+          nullable: true
+        dadosAntes:
+          type: string
+          nullable: true
+        dadosDepois:
+          type: string
+          nullable: true
+        criadoEm:
+          type: string
+          format: date-time
